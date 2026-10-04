@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Cubic Dash - Aventura Pixel Retro</title>
+  <meta name="description" content="Juego arcade de plataformas retro en el que controlas un cubo que salta obstáculos a toda velocidad a través de increíbles niveles de neón.">
+  
+  <!-- Fuentes modernas Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-app">
+    <!-- Contenedor del Juego -->
+    <div id="game-wrapper">
+      <canvas id="gameCanvas" width="960" height="540" tabindex="0"></canvas>
+
+      <!-- HUD Superior en Partida -->
+      <div id="game-hud" class="hud-container hidden">
+        <div class="hud-left">
+          <button id="btn-pause" class="icon-btn" title="Pausar (Esc)" aria-label="Pausa">⏸</button>
+          <button id="btn-fullscreen" class="icon-btn" title="Pantalla Completa (F)" aria-label="Pantalla Completa">⛶</button>
+          <button id="btn-audio-hud" class="icon-btn" title="Silenciar / Activar Sonido" aria-label="Sonido">🔊</button>
+          <button id="btn-practice-toggle" class="icon-btn practice-btn" title="Modo Práctica (Checkpoints)" aria-label="Práctica">🚩</button>
+          <div class="hud-info">
+            <span id="hud-level-name" class="level-badge">Nivel 1</span>
+            <span id="hud-attempts" class="attempts-badge">Intento 1</span>
+          </div>
+        </div>
+
+        <div class="hud-center">
+          <div class="progress-bar-container">
+            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+            <span id="progress-percentage" class="progress-text">0%</span>
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <!-- Modo de vehículo actual -->
+          <div id="hud-vehicle-indicator" class="vehicle-indicator cube-mode" title="Modo actual">
+            <span id="hud-vehicle-icon">🟩</span> <span id="hud-vehicle-text">CUBO</span>
+          </div>
+          <!-- Controles de práctica cuando está activo -->
+          <div id="practice-controls" class="practice-controls hidden">
+            <button id="btn-add-checkpoint" class="btn-checkpoint add" title="Colocar Punto de Control (Tecla Z)">+ 📍</button>
+            <button id="btn-del-checkpoint" class="btn-checkpoint del" title="Borrar Último Punto (Tecla X)">✕</button>
+          </div>
+          <div class="stars-counter" id="stars-counter">⭐ <span id="stars-count-val">0</span></div>
+        </div>
+      </div>
+
+      <!-- Barra de controles para PC en la parte inferior -->
+      <div id="pc-controls-bar" class="pc-controls-bar">
+        <span class="control-key"><kbd>ESPACIO</kbd> / <kbd>W</kbd> / <kbd>CLIC</kbd> Saltar / Impulso Nave</span>
+        <span class="control-separator">•</span>
+        <span class="control-key"><kbd>F</kbd> Pantalla Completa</span>
+        <span class="control-separator">•</span>
+        <span class="control-key"><kbd>ESC</kbd> Pausa</span>
+        <span class="control-separator">•</span>
+        <span class="control-key"><kbd>Z</kbd> / <kbd>X</kbd> Checkpoints</span>
+      </div>
+
+      <!-- Mensaje flotante de Nave Espacial -->
+      <div id="vehicle-hint" class="vehicle-hint hidden">
+        <span>🚀 ¡MODO NAVE ESPACIAL! MANTÉN PULSADO PARA SUBIR</span>
+      </div>
+
+      <!-- PANTALLA: MENÚ PRINCIPAL -->
+      <div id="screen-main-menu" class="screen-overlay active">
+        <div class="menu-card glass-panel">
+          <div class="logo-container">
+            <div class="cube-mascot" id="menu-cube-preview"></div>
+            <h1 class="game-title">CUBIC<span class="highlight">DASH</span></h1>
+            <p class="game-subtitle">RETRO PIXEL RUNNER</p>
+          </div>
+
+          <div class="menu-actions">
+            <button id="btn-play-quick" class="btn btn-primary pulse-effect">
+              <span class="btn-icon">▶</span> ¡JUGAR AHORA!
+            </button>
+            <button id="btn-select-level" class="btn btn-secondary">
+              <span class="btn-icon">🗺️</span> SELECCIONAR NIVEL
+            </button>
+            <button id="btn-open-skins" class="btn btn-secondary">
+              <span class="btn-icon">🎨</span> PERSONALIZAR CUBO
+            </button>
+            <button id="btn-how-to-play" class="btn btn-tertiary">
+              <span class="btn-icon">❓</span> CÓMO JUGAR
+            </button>
+          </div>
+
+          <div class="menu-footer">
+            <button id="btn-toggle-sound-menu" class="btn-text">🔊 Sonido: ON</button>
+            <span class="controls-hint-text">⌨️ Controles de PC: Pulsa la BARRA ESPACIADORA para jugar y saltar</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANTALLA: SELECTOR DE NIVELES -->
+      <div id="screen-level-select" class="screen-overlay hidden">
+        <div class="menu-card glass-panel wide">
+          <div class="screen-header">
+            <h2>SELECCIONA UN NIVEL</h2>
+            <button id="btn-close-levels" class="btn-close" aria-label="Cerrar">✕</button>
+          </div>
+
+          <div class="levels-grid" id="levels-grid-container">
+            <!-- Se llena dinámicamente desde levels.js -->
+          </div>
+
+          <div class="screen-footer">
+            <button id="btn-back-to-menu-from-levels" class="btn btn-secondary">← VOLVER AL MENÚ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANTALLA: PERSONALIZACIÓN (SKINS Y COLORES) -->
+      <div id="screen-skins" class="screen-overlay hidden">
+        <div class="menu-card glass-panel wide">
+          <div class="screen-header">
+            <h2>PERSONALIZA TU CUBO</h2>
+            <button id="btn-close-skins" class="btn-close" aria-label="Cerrar">✕</button>
+          </div>
+
+          <div class="skin-customizer-body">
+            <div class="skin-preview-section">
+              <div class="preview-box">
+                <canvas id="skinPreviewCanvas" width="160" height="160"></canvas>
+              </div>
+              <span id="skin-name-display" class="skin-name-tag">Cubo Neón</span>
+            </div>
+
+            <div class="skin-options-section">
+              <h3>Elige tu Cara / Estilo</h3>
+              <div class="skins-palette" id="faces-selector-container">
+                <!-- Se llena dinámicamente -->
+              </div>
+
+              <h3>Elige tu Color</h3>
+              <div class="colors-palette" id="colors-selector-container">
+                <!-- Se llena dinámicamente -->
+              </div>
+            </div>
+          </div>
+
+          <div class="screen-footer">
+            <button id="btn-save-skin" class="btn btn-primary">GUARDAR Y SALIR</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANTALLA: CÓMO JUGAR -->
+      <div id="screen-how-to-play" class="screen-overlay hidden">
+        <div class="menu-card glass-panel">
+          <div class="screen-header">
+            <h2>CÓMO JUGAR</h2>
+            <button id="btn-close-how" class="btn-close" aria-label="Cerrar">✕</button>
+          </div>
+
+          <div class="instructions-content">
+            <div class="instruction-item">
+              <div class="inst-icon">📱 / 💻</div>
+              <div class="inst-desc">
+                <strong>Controles Sencillos:</strong>
+                <p>En móvil toca la pantalla. En PC usa la <b>Barra Espaciadora</b>, <b>Flecha Arriba</b> o el <b>Clic del Ratón</b> para saltar.</p>
+              </div>
+            </div>
+
+            <div class="instruction-item">
+              <div class="inst-icon">🔺</div>
+              <div class="inst-desc">
+                <strong>¡Cuidado con los Pinchos!</strong>
+                <p>Cualquier contacto con los triángulos te destruirá al instante. ¡Salta a tiempo!</p>
+              </div>
+            </div>
+
+            <div class="instruction-item">
+              <div class="inst-icon">🧱</div>
+              <div class="inst-desc">
+                <strong>Bloques y Plataformas:</strong>
+                <p>Puedes aterrizar sobre ellos con seguridad. Chocar con sus lados o por abajo te hará estrellarte.</p>
+              </div>
+            </div>
+
+            <div class="instruction-item">
+              <div class="inst-icon">🟡</div>
+              <div class="inst-desc">
+                <strong>Plataformas y Orbes de Salto:</strong>
+                <p>Pisa las plataformas amarillas para un super rebote. Toca la pantalla en el aire al pasar por los orbes circulares para impulsarte.</p>
+              </div>
+            </div>
+
+            <div class="instruction-item">
+              <div class="inst-icon">🚀</div>
+              <div class="inst-desc">
+                <strong>¡Nave Espacial / Cohete!</strong>
+                <p>Al cruzar el portal de nave, <b>mantén pulsada la Barra Espaciadora o Clic</b> para encender los propulsores y elevarte. Suelta para caer con la gravedad. ¡Pilota esquivando los pinchos del techo y el suelo!</p>
+              </div>
+            </div>
+
+            <div class="instruction-item">
+              <div class="inst-icon">🌀</div>
+              <div class="inst-desc">
+                <strong>Portales de Gravedad y Velocidad:</strong>
+                <p>Cruza los portales amarillos/azules para invertir la gravedad y correr por el techo. Los portales con flechas cambiarán la velocidad del nivel.</p>
+              </div>
+            </div>
+
+            <div class="instruction-item">
+              <div class="inst-icon">🚩</div>
+              <div class="inst-desc">
+                <strong>Modo Práctica (Checkpoints):</strong>
+                <p>Activa el icono de la bandera 🚩 para entrenar. Usa la tecla <b>Z</b> (o botón +📍) para guardar un punto y <b>X</b> para borrarlo.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen-footer">
+            <button id="btn-close-how-btn" class="btn btn-primary">¡ENTENDIDO, A JUGAR!</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL DE PAUSA -->
+      <div id="modal-pause" class="screen-overlay hidden">
+        <div class="menu-card glass-panel small">
+          <h2>JUEGO EN PAUSA</h2>
+          <div class="pause-actions">
+            <button id="btn-resume" class="btn btn-primary">▶ CONTINUAR</button>
+            <button id="btn-restart-pause" class="btn btn-secondary">🔄 REINICIAR NIVEL</button>
+            <button id="btn-quit-to-menu" class="btn btn-tertiary">🏠 MENÚ PRINCIPAL</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL DE NIVEL COMPLETADO (VICTORIA) -->
+      <div id="modal-victory" class="screen-overlay hidden">
+        <div class="menu-card glass-panel celebration">
+          <div class="victory-banner">
+            <span class="trophy-icon">🏆</span>
+            <h2 class="victory-title">¡NIVEL COMPLETADO!</h2>
+            <p id="victory-level-title" class="victory-sub">Nivel 1 Superado</p>
+          </div>
+
+          <div class="victory-stats">
+            <div class="stat-box">
+              <span class="stat-label">Intentos:</span>
+              <span id="victory-attempts-val" class="stat-val">1</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Precisión:</span>
+              <span class="stat-val">100%</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Estrellas:</span>
+              <span id="victory-stars-val" class="stat-val">⭐⭐⭐</span>
+            </div>
+          </div>
+
+          <div class="victory-actions">
+            <button id="btn-next-level" class="btn btn-primary pulse-effect">SIGUIENTE NIVEL ➔</button>
+            <button id="btn-replay-level" class="btn btn-secondary">REPETIR NIVEL 🔄</button>
+            <button id="btn-victory-menu" class="btn btn-tertiary">MENÚ PRINCIPAL 🏠</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts del juego -->
+  <script src="audio.js"></script>
+  <script src="levels.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Idol Warriors: Operación Hogar ✨💖</title>
+  <meta name="description" content="Juego interactivo estilo Guerreras K-Pop para cumplir retos del hogar, subir fotos de evidencia, acumular Gemas Estelares y canjear Vales VIP familiares.">
+  
+  <!-- Google Fonts: Fredoka y Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Canvas para fuegos artificiales y lluvia de estrellas -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Barra Superior / Stage Central -->
+  <header class="top-nav">
+    <div class="agent-summary" id="agentBadgeBtn" title="Ver mi Credencial de Idol Guerrera">
+      <div class="avatar-ring">
+        <span class="avatar-emoji" id="navAvatarEmoji">🎤</span>
+        <span class="sparkle-orbit">✨</span>
+      </div>
+      <div class="agent-titles">
+        <span class="agent-rank-badge" id="navRankBadge">Rango: Debutante Pop</span>
+        <h2 class="agent-codename" id="navCodename">Vocalista Cósmica</h2>
+      </div>
+    </div>
+
+    <!-- Bóveda de Gemas Estelares -->
+    <div class="coin-vault" id="coinVault">
+      <div class="coin-icon-glow">💎</div>
+      <div class="coin-counter">
+        <span class="coin-number" id="coinBalance">0</span>
+        <span class="coin-label">Gemas Estelares</span>
+      </div>
+    </div>
+
+    <!-- Botón Cuartel General de Padres -->
+    <button class="hq-parent-btn" id="openParentHqBtn" title="Acceso exclusivo para Padres (Cuartel General)">
+      <span class="lock-icon">🔒</span>
+      <span class="hq-text">Zona Padres</span>
+      <span class="pending-badge" id="pendingHqBadge" style="display: none;">0</span>
+    </button>
+  </header>
+
+  <!-- Pestañas Táctiles Estilo K-Pop Idol -->
+  <nav class="tablet-tabs">
+    <button class="tab-btn active" data-tab="tab-missions" id="tabBtnMissions">
+      <span class="tab-icon">✨</span>
+      <span class="tab-text">Misiones de Guerrera</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-store" id="tabBtnStore">
+      <span class="tab-icon">🛍️</span>
+      <span class="tab-text">Tienda de Premios VIP</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-profile" id="tabBtnProfile">
+      <span class="tab-icon">💖</span>
+      <span class="tab-text">Pase de Idol</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-tickets" id="tabBtnTickets">
+      <span class="tab-icon">🎫</span>
+      <span class="tab-text">Mis Pases VIP</span>
+    </button>
+  </nav>
+
+  <!-- Contenedor Principal de Vistas -->
+  <main class="main-container">
+
+    <!-- ============================================== -->
+    <!-- PESTAÑA 1: MISIONES DE GUERRERA (RETOS DEL HOGAR) -->
+    <!-- ============================================== -->
+    <section class="tab-content active" id="tab-missions">
+      <div class="mission-dashboard-header">
+        <div>
+          <span class="classified-tag">★ ESCUADRÓN IDOL WARRIORS ★</span>
+          <h1 class="section-title">Misiones del Escenario Hogar</h1>
+          <p class="section-desc">¡Activa tu poder de guerrera, toma la foto-evidencia de la misión y gana Gemas Estelares para canjear premios!</p>
+        </div>
+        
+        <!-- Filtros de misiones -->
+        <div class="filter-pills">
+          <button class="filter-pill active" data-filter="all">Todas</button>
+          <button class="filter-pill" data-filter="pending">Por Hacer</button>
+          <button class="filter-pill" data-filter="review">En Backstage</button>
+          <button class="filter-pill" data-filter="done">¡Brillantes! ✨</button>
+        </div>
+      </div>
+
+      <!-- Barra de Progreso del Día -->
+      <div class="daily-progress-card">
+        <div class="progress-info">
+          <span>💖 Energía Pop de Hoy: <b id="progressPercentText">0%</b></span>
+          <span id="missionsCountText">0 de 0 misiones completadas</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="dailyProgressBar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Cuadrícula de Tarjetas de Misiones -->
+      <div class="missions-grid" id="missionsGrid">
+        <!-- Generado dinámicamente con JS -->
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PESTAÑA 2: TIENDA DE PREMIOS VIP FAMILIARES -->
+    <!-- ============================================== -->
+    <section class="tab-content" id="tab-store">
+      <div class="store-header">
+        <span class="classified-tag">★ BOUTIQUE VIP FAMILIAR ★</span>
+        <h1 class="section-title">Boutique de Premios VIP</h1>
+        <p class="section-desc">Canjea tus Gemas Estelares por increíbles recompensas reales preparadas con papá y mamá.</p>
+        
+        <div class="store-balance-banner">
+          <span class="banner-coin">💎</span>
+          <span>Tienes acumuladas: <strong id="storeAvailableCoins">0</strong> Gemas Estelares</span>
+        </div>
+      </div>
+
+      <div class="rewards-grid" id="rewardsGrid">
+        <!-- Generado dinámicamente con JS -->
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PESTAÑA 3: CARNET / PASE DE IDOL GUERRERA -->
+    <!-- ============================================== -->
+    <section class="tab-content" id="tab-profile">
+      <div class="id-card-wrapper">
+        <div class="spy-id-card">
+          <div class="id-card-top">
+            <span class="agency-logo">⭐ K-POP WARRIOR ACADEMY</span>
+            <span class="id-code" id="cardAgentId">IDOL-2026</span>
+          </div>
+
+          <div class="id-card-body">
+            <div class="id-photo-frame">
+              <span class="id-avatar-large" id="cardAvatarEmoji">🎤</span>
+              <button class="change-avatar-btn" id="openAvatarPickerBtn">Cambiar Estilo 💖</button>
+            </div>
+
+            <div class="id-details">
+              <div class="field">
+                <span class="field-label">Nombre Artístico / Clave:</span>
+                <div class="editable-name-row">
+                  <span class="field-value" id="cardCodename">Vocalista Cósmica</span>
+                  <button class="edit-name-btn" id="editNameBtn">✏️</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <span class="field-label">Rango de Guerrera:</span>
+                <span class="rank-tag-large" id="cardRankTag">🌸 Debutante Pop</span>
+              </div>
+
+              <div class="field-row-stats">
+                <div class="mini-stat">
+                  <span class="mini-stat-num" id="statCompletedCases">0</span>
+                  <span class="mini-stat-label">Retos Brillantes</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-num" id="statTotalCoinsEarned">0</span>
+                  <span class="mini-stat-label">Gemas Ganadas</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-num" id="statRewardsClaimed">0</span>
+                  <span class="mini-stat-label">Pases Canjeados</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="id-card-bottom">
+            <span>PASE DE ACCESO TOTAL • BRILLO Y PODER • CUARTEL FAMILIAR</span>
+          </div>
+        </div>
+
+        <!-- Rango y Logros -->
+        <div class="ranks-roadmap-card">
+          <h3 class="roadmap-title">👑 Escalafón del Escuadrón Idol</h3>
+          <div class="ranks-list" id="ranksList">
+            <!-- Dinámico -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PESTAÑA 4: HISTORIAL DE PASES VIP CANJEADOS -->
+    <!-- ============================================== -->
+    <section class="tab-content" id="tab-tickets">
+      <div class="tickets-header">
+        <span class="classified-tag">★ COLECCIÓN VIP ★</span>
+        <h1 class="section-title">Mis Pases de Recompensa</h1>
+        <p class="section-desc">Muestra estos pases dorados a tus padres para disfrutar de tus momentos y premios especiales.</p>
+      </div>
+
+      <div class="tickets-container" id="ticketsContainer">
+        <!-- Generado dinámicamente con JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================== -->
+  <!-- MODAL 1: CÁMARA DE FOTO-EVIDENCIA (VISOR MÁGICO) -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop" id="cameraModal">
+    <div class="modal-card camera-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-badge">📸 LENTE MÁGICO DE GUERRERA</span>
+          <h3 class="modal-title" id="cameraMissionTitle">Misión: Escenario Impecable</h3>
+        </div>
+        <button class="modal-close-btn" id="closeCameraModalBtn">✕</button>
+      </div>
+
+      <div class="camera-viewport-container">
+        <!-- Vista previa en vivo -->
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <!-- Canvas para capturar -->
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+        
+        <!-- Retícula holográfica de guerrera -->
+        <div class="spy-reticle">
+          <div class="reticle-corner top-left"></div>
+          <div class="reticle-corner top-right"></div>
+          <div class="reticle-corner bottom-left"></div>
+          <div class="reticle-corner bottom-right"></div>
+          <div class="reticle-center"></div>
+          <span class="reticle-tag">💖 ENFOQUE MÁGICO • EVIDENCIA BRILLANTE ✨</span>
+        </div>
+
+        <!-- Vista previa de foto tomada -->
+        <div class="photo-preview-overlay" id="photoPreviewOverlay" style="display: none;">
+          <img id="capturedPhotoImg" alt="Foto Evidencia">
+          <div class="watermark-stamp">
+            <span>MISIÓN CUMPLIDA ✨</span>
+            <small id="watermarkDate">03/10/2026</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controles de la cámara -->
+      <div class="camera-controls">
+        <div id="liveCameraButtons" class="btn-group">
+          <label class="btn btn-secondary file-upload-label" title="Subir desde galería">
+            📁 Galería
+            <input type="file" id="fileFallbackInput" accept="image/*" capture="environment" style="display: none;">
+          </label>
+          <button class="btn btn-shutter" id="shutterBtn" title="¡Capturar con Brillo!">
+            <span class="shutter-circle"></span>
+          </button>
+          <button class="btn btn-secondary" id="switchCameraBtn" title="Cambiar Cámara">🔄 Girar</button>
+        </div>
+
+        <div id="reviewCameraButtons" class="btn-group" style="display: none;">
+          <button class="btn btn-secondary" id="retakePhotoBtn">🔄 Tomar Otra</button>
+          <button class="btn btn-primary-glow" id="sendEvidenceBtn">✨ Enviar a Revisión de Padres</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 2: ACCESO PADRES CON PIN -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop" id="parentPinModal">
+    <div class="modal-card pin-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-badge">🔐 BACKSTAGE DE PADRES</span>
+          <h3 class="modal-title">Control de Producción</h3>
+        </div>
+        <button class="modal-close-btn" id="closePinModalBtn">✕</button>
+      </div>
+
+      <div class="pin-instruction">
+        <p>Ingresa el código PIN de 4 dígitos para aprobar misiones y premios.</p>
+        <small class="pin-hint">(PIN por defecto: <b>1234</b>)</small>
+      </div>
+
+      <!-- Indicadores de dígitos -->
+      <div class="pin-dots">
+        <div class="pin-dot" id="pdot-0"></div>
+        <div class="pin-dot" id="pdot-1"></div>
+        <div class="pin-dot" id="pdot-2"></div>
+        <div class="pin-dot" id="pdot-3"></div>
+      </div>
+      <div class="pin-error-msg" id="pinErrorMsg"></div>
+
+      <!-- Teclado Numérico Táctil -->
+      <div class="pin-keypad">
+        <button class="keypad-btn" data-key="1">1</button>
+        <button class="keypad-btn" data-key="2">2</button>
+        <button class="keypad-btn" data-key="3">3</button>
+        <button class="keypad-btn" data-key="4">4</button>
+        <button class="keypad-btn" data-key="5">5</button>
+        <button class="keypad-btn" data-key="6">6</button>
+        <button class="keypad-btn" data-key="7">7</button>
+        <button class="keypad-btn" data-key="8">8</button>
+        <button class="keypad-btn" data-key="9">9</button>
+        <button class="keypad-btn special-key" data-key="clear">Borrar</button>
+        <button class="keypad-btn" data-key="0">0</button>
+        <button class="keypad-btn special-key" data-key="backspace">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 3: PANEL DEL CUARTEL GENERAL (PADRES) -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop" id="parentHqModal">
+    <div class="modal-card hq-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-badge">⭐ MANDO DE PRODUCCIÓN</span>
+          <h2 class="modal-title">Panel de Control de Padres</h2>
+        </div>
+        <button class="modal-close-btn" id="closeHqModalBtn">✕</button>
+      </div>
+
+      <div class="hq-tabs">
+        <button class="hq-tab-btn active" data-hqtab="hq-tab-review">
+          📸 Revisar Evidencias (<span id="hqPendingCount">0</span>)
+        </button>
+        <button class="hq-tab-btn" data-hqtab="hq-tab-manage-missions">
+          ⚙️ Gestionar Misiones
+        </button>
+        <button class="hq-tab-btn" data-hqtab="hq-tab-manage-rewards">
+          🎁 Gestionar Premios
+        </button>
+        <button class="hq-tab-btn" data-hqtab="hq-tab-settings">
+          🔒 Seguridad y Ajustes
+        </button>
+      </div>
+
+      <!-- SUBTAB 1: REVISAR FOTOS ENVIADAS -->
+      <div class="hq-tab-content active" id="hq-tab-review">
+        <div class="review-intro">
+          <h3>Evidencias Fotográficas por Aprobar</h3>
+          <p>Revisa la foto que tomó tu hija. Al pulsar <b>Aprobar Misión</b> se estampará el sello y se sumarán automáticamente las Gemas a su carnet.</p>
+        </div>
+
+        <div class="pending-reviews-list" id="pendingReviewsList">
+          <!-- Renderizado dinámico -->
+        </div>
+      </div>
+
+      <!-- SUBTAB 2: GESTIONAR MISIONES -->
+      <div class="hq-tab-content" id="hq-tab-manage-missions">
+        <div class="section-action-bar">
+          <h3>Misiones del Hogar Activas</h3>
+          <button class="btn btn-primary" id="openNewMissionFormBtn">➕ Crear Nueva Misión</button>
+        </div>
+
+        <!-- Formulario nueva misión -->
+        <div class="form-drawer" id="newMissionForm" style="display: none;">
+          <h4>Nueva Misión de Guerrera</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Icono / Emoji:</label>
+              <input type="text" id="newMissionEmoji" value="✨" maxlength="2">
+            </div>
+            <div class="form-group">
+              <label>Nombre de la Misión:</label>
+              <input type="text" id="newMissionTitle" placeholder="Ej: Operación Cama Impecable">
+            </div>
+            <div class="form-group">
+              <label>Recompensa (Gemas 💎):</label>
+              <input type="number" id="newMissionCoins" value="10" min="1" max="100">
+            </div>
+            <div class="form-group full-width">
+              <label>Instrucciones de la Misión:</label>
+              <input type="text" id="newMissionDesc" placeholder="Ej: Estira las sábanas y pon las almohadas en su lugar.">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelNewMissionBtn">Cancelar</button>
+            <button class="btn btn-primary-glow" id="saveNewMissionBtn">Guardar Misión</button>
+          </div>
+        </div>
+
+        <div class="hq-missions-table" id="hqMissionsList">
+          <!-- Dinámico -->
+        </div>
+      </div>
+
+      <!-- SUBTAB 3: GESTIONAR PREMIOS -->
+      <div class="hq-tab-content" id="hq-tab-manage-rewards">
+        <div class="section-action-bar">
+          <h3>Catálogo de Premios VIP</h3>
+          <button class="btn btn-primary" id="openNewRewardFormBtn">➕ Añadir Premio Familiar</button>
+        </div>
+
+        <!-- Formulario nuevo premio -->
+        <div class="form-drawer" id="newRewardForm" style="display: none;">
+          <h4>Nuevo Pase de Premio VIP</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Icono / Emoji:</label>
+              <input type="text" id="newRewardEmoji" value="🍦" maxlength="2">
+            </div>
+            <div class="form-group">
+              <label>Nombre del Premio:</label>
+              <input type="text" id="newRewardTitle" placeholder="Ej: Tarde de Heladería Doble">
+            </div>
+            <div class="form-group">
+              <label>Costo en Gemas 💎:</label>
+              <input type="number" id="newRewardCost" value="25" min="5" max="500">
+            </div>
+            <div class="form-group full-width">
+              <label>Descripción / Condiciones:</label>
+              <input type="text" id="newRewardDesc" placeholder="Ej: Salida el fin de semana para comer su helado favorito.">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelNewRewardBtn">Cancelar</button>
+            <button class="btn btn-primary-glow" id="saveNewRewardBtn">Guardar Premio</button>
+          </div>
+        </div>
+
+        <div class="hq-rewards-table" id="hqRewardsList">
+          <!-- Dinámico -->
+        </div>
+      </div>
+
+      <!-- SUBTAB 4: AJUSTES Y SEGURIDAD -->
+      <div class="hq-tab-content" id="hq-tab-settings">
+        <div class="settings-card">
+          <h3>Cambiar Código PIN de Padres</h3>
+          <p>Define un nuevo PIN de 4 dígitos para proteger este panel.</p>
+          <div class="form-grid" style="max-width: 320px;">
+            <div class="form-group">
+              <label>Nuevo PIN (4 dígitos):</label>
+              <input type="password" id="newPinInput" maxlength="4" placeholder="••••">
+            </div>
+            <button class="btn btn-primary" id="saveNewPinBtn">Actualizar PIN</button>
+          </div>
+        </div>
+
+        <div class="settings-card danger-zone">
+          <h3>Reiniciar Datos de Muestra</h3>
+          <p>Restaura las misiones y premios originales de Guerreras K-Pop si deseas empezar de nuevo.</p>
+          <button class="btn btn-danger" id="resetDefaultsBtn">⚠️ Restaurar Datos Originales</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 4: PASE VIP DORADO HOLOGRÁFICO -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop" id="ticketModal">
+    <div class="modal-card ticket-modal-card">
+      <div class="ticket-golden" id="ticketGoldenCard">
+        <div class="ticket-header">
+          <span class="ticket-badge">✨ PASE VIP DE RECOMPENSA ✨</span>
+          <span class="ticket-agency">K-POP WARRIOR ACADEMY</span>
+        </div>
+        
+        <div class="ticket-body">
+          <div class="ticket-emoji" id="ticketEmoji">🎬</div>
+          <h2 class="ticket-title" id="ticketTitle">Tarde de Película y Palomitas</h2>
+          <p class="ticket-desc" id="ticketDesc">Válido para elegir la película familiar y disfrutar con palomitas recién hechas.</p>
+          
+          <div class="ticket-meta">
+            <div>
+              <span class="meta-label">IDOL GUERRERA:</span>
+              <strong id="ticketAgentName">Vocalista Cósmica</strong>
+            </div>
+            <div>
+              <span class="meta-label">CÓDIGO VIP:</span>
+              <strong class="ticket-code" id="ticketUniqueCode">#VIP-9842</strong>
+            </div>
+            <div>
+              <span class="meta-label">FECHA:</span>
+              <span id="ticketDateText">03/10/2026</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ticket-footer">
+          <span class="ticket-seal">💖 PASE CANJEADO CON ÉXITO</span>
+          <small>¡Muéstrale este pase VIP a tus padres para disfrutar tu momento especial!</small>
+        </div>
+      </div>
+
+      <div class="ticket-actions">
+        <button class="btn btn-primary-glow" id="closeTicketModalBtn">¡A brillar y disfrutar! 🎉💖</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 5: VESTIDOR IDOL (AVATARES GUERRERAS K-POP) -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop" id="avatarModal">
+    <div class="modal-card avatar-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-badge">✨ VESTIDOR DE GUERRERAS K-POP</span>
+          <h3 class="modal-title">Elige tu Estilo de Guerrera</h3>
+        </div>
+        <button class="modal-close-btn" id="closeAvatarModalBtn">✕</button>
+      </div>
+
+      <div class="avatar-choices-grid" id="avatarChoicesGrid">
+        <!-- Generado dinámicamente con JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
