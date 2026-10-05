@@ -65,6 +65,10 @@
       <span class="tab-icon">🎫</span>
       <span class="tab-text">Mis Pases VIP</span>
     </button>
+    <button class="tab-btn" data-tab="tab-arcade" id="tabBtnArcade">
+      <span class="tab-icon">🎮</span>
+      <span class="tab-text">Juegos Mágicos</span>
+    </button>
   </nav>
 
   <!-- Contenedor Principal de Vistas -->
@@ -202,6 +206,100 @@
 
       <div class="tickets-container" id="ticketsContainer">
         <!-- Generado dinámicamente con JS -->
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PESTAÑA 5: MINIJUEGOS INTERACTIVOS (6-8 AÑOS) -->
+    <!-- ============================================== -->
+    <section class="tab-content" id="tab-arcade">
+      <div class="arcade-header">
+        <span class="classified-tag">★ SALA DE ENTRENAMIENTO IDOL ★</span>
+        <h1 class="section-title">Minijuegos Mágicos 🎮✨</h1>
+        <p class="section-desc">¡Juega, adivina y ejercita tu mente para ganar Gemas Estelares extra para tus Vales VIP familiares!</p>
+
+        <!-- Selector de Juegos -->
+        <div class="arcade-nav-pills">
+          <button class="arcade-pill active" id="pillQuiz" onclick="switchArcadeGame('quiz')">
+            <span class="pill-icon">✨</span>
+            <span class="pill-text">Adivinanzas & Quiz</span>
+          </button>
+          <button class="arcade-pill" id="pillMemory" onclick="switchArcadeGame('memory')">
+            <span class="pill-icon">🃏</span>
+            <span class="pill-text">Memoria de Idols</span>
+          </button>
+          <button class="arcade-pill" id="pillCatch" onclick="switchArcadeGame('catch')">
+            <span class="pill-icon">🌟</span>
+            <span class="pill-text">Atrapa-Gemas</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- VISTA 1: ADIVINANZAS & QUIZ MÁGICO -->
+      <div class="arcade-game-view active" id="gameViewQuiz">
+        <div class="quiz-card-wrapper">
+          <div class="quiz-top-bar">
+            <span class="quiz-category-badge" id="quizCategoryBadge">🐾 Animales Mágicos</span>
+            <div class="quiz-status-tags">
+              <span class="quiz-counter-tag" id="quizCounterText">Adivinanza 1 de 15</span>
+              <span class="quiz-reward-tag">💎 +3 por acierto</span>
+            </div>
+          </div>
+
+          <div class="quiz-question-box">
+            <div class="quiz-emoji-main" id="quizEmojiMain">🦁</div>
+            <h2 class="quiz-question-text" id="quizQuestionText">Cargando adivinanza...</h2>
+          </div>
+
+          <div class="quiz-feedback-box" id="quizFeedbackBox" style="display: none;"></div>
+
+          <div class="quiz-options-grid" id="quizOptionsGrid">
+            <!-- Botones de opciones generados dinámicamente con JS -->
+          </div>
+
+          <div class="quiz-footer-actions">
+            <button class="btn btn-secondary" id="quizRestartBtn" onclick="restartQuiz()">🔄 Reiniciar Rondas</button>
+            <button class="btn btn-primary-glow" id="quizNextBtn" style="display: none;" onclick="nextQuizQuestion()">¡Siguiente Adivinanza! ✨ ➡️</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA 2: MEMORIA DE IDOLS (PAREJAS) -->
+      <div class="arcade-game-view" id="gameViewMemory" style="display: none;">
+        <div class="memory-wrapper">
+          <div class="memory-top-bar">
+            <div class="memory-stats-group">
+              <span class="memory-badge">🃏 Intentos: <b id="memoryFlipsText">0</b></span>
+              <span class="memory-badge">✨ Parejas: <b id="memoryMatchesText">0 / 6</b></span>
+              <span class="memory-badge bonus-badge">💎 Premio: +10 Gemas</span>
+            </div>
+            <button class="btn btn-secondary" onclick="initMemoryGame()">🔄 Barajar de Nuevo</button>
+          </div>
+
+          <div class="memory-grid" id="memoryGrid">
+            <!-- 12 cartas generadas dinámicamente con JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA 3: ATRAPA-GEMAS ESTELAR -->
+      <div class="arcade-game-view" id="gameViewCatch" style="display: none;">
+        <div class="catch-wrapper">
+          <div class="catch-top-bar">
+            <span class="catch-badge">⏱️ Tiempo: <b id="catchTimerText">20s</b></span>
+            <span class="catch-badge">💎 Atrapadas: <b id="catchScoreText">0</b></span>
+            <span class="catch-badge bonus-badge">✨ 4 atrapadas = 1 💎</span>
+          </div>
+
+          <div class="catch-stage" id="catchStage">
+            <div class="catch-start-screen" id="catchStartScreen">
+              <span class="stage-big-emoji">🌟</span>
+              <h3>¡Atrapa tantas Gemas y Estrellas como puedas!</h3>
+              <p>Tócalas rápido con el dedo en la pantalla antes de que desaparezcan. ¡Cada 4 gemas que toques te darán 1 Gema Estelar real para tus Vales VIP!</p>
+              <button class="btn btn-primary-glow" id="startCatchGameBtn" onclick="startCatchGame()">🚀 ¡Comenzar Juego! (20s)</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
