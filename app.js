@@ -386,42 +386,42 @@ const DEFAULT_REWARDS = [
     emoji: '🎬',
     title: 'Tarde de Película y Palomitas VIP',
     desc: 'Tú eliges la película familiar de la noche acompañada de deliciosas palomitas calientes.',
-    cost: 25
+    cost: 65
   },
   {
     id: 'r2',
     emoji: '🍦',
     title: 'Pase Mágico para Heladería',
     desc: 'Salida especial a la heladería para pedir tu cono o copa con tus sabores favoritos.',
-    cost: 35
+    cost: 95
   },
   {
     id: 'r3',
     emoji: '🎮',
     title: '30 Minutos Extra de Juego o Baile',
     desc: 'Media hora extra de videojuegos, música, baile libre o dibujos animados por la tarde.',
-    cost: 20
+    cost: 50
   },
   {
     id: 'r4',
     emoji: '🍕',
     title: 'Cena Especial del Viernes (Menú Idol)',
     desc: 'Tú tienes el poder supremo de elegir qué cenamos toda la familia el viernes.',
-    cost: 45
+    cost: 120
   },
   {
     id: 'r5',
     emoji: '🎡',
     title: 'Tarde de Parque, Bici o Patines',
     desc: 'Paseo al aire libre con papá y mamá a disfrutar en los columpios y patines.',
-    cost: 30
+    cost: 80
   },
   {
     id: 'r6',
     emoji: '👑',
     title: 'Pase Real: Día Libre de Poner la Mesa',
     desc: 'Un día de descanso donde un adulto pondrá los platos y cubiertos por ti.',
-    cost: 15
+    cost: 35
   }
 ];
 
@@ -458,7 +458,19 @@ class GameManager {
     this.missions = savedMissions ? JSON.parse(savedMissions) : JSON.parse(JSON.stringify(DEFAULT_MISSIONS));
 
     const savedRewards = localStorage.getItem('kpop_rewards');
-    this.rewards = savedRewards ? JSON.parse(savedRewards) : JSON.parse(JSON.stringify(DEFAULT_REWARDS));
+    let loadedRewards = savedRewards ? JSON.parse(savedRewards) : JSON.parse(JSON.stringify(DEFAULT_REWARDS));
+
+    // Sincronizar automáticamente nuevos valores de premios en dispositivos existentes
+    const REWARDS_VERSION = 'v2_higher_prices';
+    if (localStorage.getItem('kpop_rewards_version') !== REWARDS_VERSION) {
+      loadedRewards = loadedRewards.map(r => {
+        const def = DEFAULT_REWARDS.find(d => d.id === r.id);
+        return def ? { ...r, cost: def.cost, title: def.title, desc: def.desc } : r;
+      });
+      localStorage.setItem('kpop_rewards_version', REWARDS_VERSION);
+      localStorage.setItem('kpop_rewards', JSON.stringify(loadedRewards));
+    }
+    this.rewards = loadedRewards;
 
     const savedTickets = localStorage.getItem('kpop_tickets');
     this.tickets = savedTickets ? JSON.parse(savedTickets) : [];
@@ -1359,7 +1371,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('editNameBtn').addEventListener('click', promptEditName);
 
   // Inicializar Minijuegos
-  initQuiz();
   initMemoryGame();
 });
 
@@ -1372,13 +1383,11 @@ window.switchArcadeGame = function(gameType) {
   audio.playTap();
   
   const pills = {
-    quiz: document.getElementById('pillQuiz'),
     memory: document.getElementById('pillMemory'),
     catch: document.getElementById('pillCatch')
   };
 
   const views = {
-    quiz: document.getElementById('gameViewQuiz'),
     memory: document.getElementById('gameViewMemory'),
     catch: document.getElementById('gameViewCatch')
   };
@@ -1394,244 +1403,6 @@ window.switchArcadeGame = function(gameType) {
   if (gameType === 'memory' && (!window.memoryInitialized || window.matchedPairs === 6)) {
     initMemoryGame();
   }
-};
-
-// --- B. MINIJUEGO 1: ADIVINANZAS & QUIZ MÁGICO (6-8 AÑOS) ---
-const QUIZ_QUESTIONS = [
-  {
-    emoji: '🦁',
-    category: '🐾 Reino Animal',
-    question: 'Tengo una gran melena dorada, un rugido muy fuerte y me llaman el rey de la selva. ¿Quién soy?',
-    options: ['El León 🦁', 'El Elefante 🐘', 'El Conejo 🐰'],
-    correct: 0,
-    tip: '¡El rey más valiente de la sabana!'
-  },
-  {
-    emoji: '🪥',
-    category: '🏠 Cuidados y Hábitos',
-    question: 'Tengo cerdas suaves, me ponen cremita blanca y dejo tus dientes brillantes después de comer. ¿Qué soy?',
-    options: ['El Cepillo de Dientes 🪥', 'El Peine 💇‍♀️', 'La Cuchara 🥄'],
-    correct: 0,
-    tip: '¡Sonrisa de Idol impecable y sana!'
-  },
-  {
-    emoji: '🎤',
-    category: '🎶 Mundo Musical',
-    question: 'Lo sostienes en tu mano en el escenario para que tu voz se escuche por todos los parlantes. ¿Qué es?',
-    options: ['Un Micrófono 🎤', 'Una Linterna 🔦', 'Un Espejo 🪞'],
-    correct: 0,
-    tip: '¡Para cantar tus canciones favoritas con el alma!'
-  },
-  {
-    emoji: '🌈',
-    category: '🎨 Magia y Colores',
-    question: 'Aparece en el cielo cuando llueve y a la vez sale el sol, ¡y tiene 7 hermosos colores brillantes!',
-    options: ['El Arcoíris 🌈', 'La Luna 🌙', 'Una Nube Gris ⛈️'],
-    correct: 0,
-    tip: '¡Un puente mágico de colores en las alturas!'
-  },
-  {
-    emoji: '⏰',
-    category: '🧩 Adivinanza Divertida',
-    question: 'Tengo dos agujas que dan vueltas, hago tic-tac sin parar y te aviso la hora de despertar. ¿Quién soy?',
-    options: ['El Reloj ⏰', 'La Brújula 🧭', 'El Termómetro 🌡️'],
-    correct: 0,
-    tip: '¡Tic-tac, tic-tac, siempre puntual!'
-  },
-  {
-    emoji: '🍓',
-    category: '🍎 Salud y Energía',
-    question: 'Soy roja, dulce, tengo pequeñas semillitas por fuera y una coronita verde de hojas. ¿Qué fruta soy?',
-    options: ['La Fresa 🍓', 'El Limón 🍋', 'El Plátano 🍌'],
-    correct: 0,
-    tip: '¡Deliciosa y llena de vitaminas poderosas!'
-  },
-  {
-    emoji: '🚀',
-    category: '🚀 Exploración Espacial',
-    question: 'Viajo más rápido que el viento, tengo fuego en los motores y llevo astronautas hacia las estrellas. ¿Qué soy?',
-    options: ['Un Cohete Espacial 🚀', 'Un Barco 🚢', 'Una Bicicleta 🚲'],
-    correct: 0,
-    tip: '¡3, 2, 1... Despegue estelar!'
-  },
-  {
-    emoji: '🐱',
-    category: '🐾 Amigos Peludos',
-    question: 'Tengo bigotes curiosos, me encanta dormir al sol, camino sin hacer ruido y digo ¡miau! ¿Quién soy?',
-    options: ['Una Gatita 🐱', 'Un Perrito 🐶', 'Un Pajarito 🐦'],
-    correct: 0,
-    tip: '¡Ronronea feliz cuando le das cariño!'
-  },
-  {
-    emoji: '🎒',
-    category: '🎒 Super Escuela',
-    question: 'Tengo dos tirantes para tu espalda y guardo tus cuadernos, lápices de colores y merienda. ¿Qué soy?',
-    options: ['La Mochila Escolar 🎒', 'El Zapatero 👟', 'La Cartuchera ✏️'],
-    correct: 0,
-    tip: '¡Tu compañera fiel de aventuras escolares!'
-  },
-  {
-    emoji: '🎨',
-    category: '🎨 Arte y Pintura',
-    question: 'Si en tu paleta de artista mezclas pintura Azul con pintura Amarilla... ¿qué color mágico se forma?',
-    options: ['Verde Esmeralda 💚', 'Rosa Pastel 💖', 'Negro Noche 🖤'],
-    correct: 0,
-    tip: '¡Azul + Amarillo = Magia Verde!'
-  },
-  {
-    emoji: '🐬',
-    category: '🌊 Océano Mágico',
-    question: 'Salto dando piruetas sobre las olas del mar, soy muy amistoso, inteligente y veloz. ¿Quién soy?',
-    options: ['El Delfín 🐬', 'El Oso Polar 🐻‍❄️', 'La Jirafa 🦒'],
-    correct: 0,
-    tip: '¡El mejor acróbata de las olas!'
-  },
-  {
-    emoji: '🛏️',
-    category: '✨ Misión de Guerrera',
-    question: 'Por la mañana al levantarte, ¿qué debes acomodar y estirar para que tu habitación se vea hermosa?',
-    options: ['La Cama y Almohadas 🛏️', 'La Puerta 🚪', 'El Techo 🏠'],
-    correct: 0,
-    tip: '¡Un camerino ordenado para una súper estrella!'
-  },
-  {
-    emoji: '🌙',
-    category: '✨ Cielo Nocturno',
-    question: 'Salgo de noche a iluminar el cielo, a veces parezco una sonrisa y otras veces un queso redondo. ¿Qué soy?',
-    options: ['La Luna 🌙', 'El Sol ☀️', 'Un Cometa ☄️'],
-    correct: 0,
-    tip: '¡Brilla para que tengas dulces sueños!'
-  },
-  {
-    emoji: '🎹',
-    category: '🎶 Ritmo y Sonido',
-    question: 'Tengo teclas blancas y negras que al tocarlas crean hermosas melodías musicales. ¿Qué instrumento soy?',
-    options: ['El Teclado / Piano 🎹', 'La Flauta 🪈', 'La Pandereta 🪇'],
-    correct: 0,
-    tip: '¡Do, Re, Mi, Fa, Sol, La, Si!'
-  },
-  {
-    emoji: '⭐',
-    category: '🌊 Misterios del Mar',
-    question: 'Vivo en el fondo del mar, tengo 5 bracitos y parezco salida del mismísimo cielo nocturno. ¿Quién soy?',
-    options: ['La Estrella de Mar ⭐', 'El Pulpo 🐙', 'El Cangrejo 🦀'],
-    correct: 0,
-    tip: '¡Una estrella mágica que nada en el agua!'
-  }
-];
-
-let quizCurrentQuestions = [];
-let quizIndex = 0;
-let quizAnswered = false;
-
-function initQuiz() {
-  quizCurrentQuestions = [...QUIZ_QUESTIONS].sort(() => Math.random() - 0.5);
-  quizIndex = 0;
-  renderQuizQuestion();
-}
-
-function renderQuizQuestion() {
-  const q = quizCurrentQuestions[quizIndex];
-  if (!q) return;
-
-  quizAnswered = false;
-  document.getElementById('quizCategoryBadge').textContent = q.category;
-  document.getElementById('quizCounterText').textContent = `Adivinanza ${quizIndex + 1} de ${quizCurrentQuestions.length}`;
-  document.getElementById('quizEmojiMain').textContent = q.emoji;
-  document.getElementById('quizQuestionText').textContent = q.question;
-
-  const feedbackBox = document.getElementById('quizFeedbackBox');
-  feedbackBox.style.display = 'none';
-  feedbackBox.className = 'quiz-feedback-box';
-
-  const nextBtn = document.getElementById('quizNextBtn');
-  nextBtn.style.display = 'none';
-
-  // Mezclar opciones manteniendo registro de la respuesta correcta
-  const optionsWithMeta = q.options.map((opt, idx) => ({
-    text: opt,
-    isCorrect: idx === q.correct
-  })).sort(() => Math.random() - 0.5);
-
-  const grid = document.getElementById('quizOptionsGrid');
-  grid.innerHTML = '';
-
-  optionsWithMeta.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = 'quiz-opt-btn';
-    btn.textContent = opt.text;
-
-    btn.addEventListener('click', () => {
-      if (quizAnswered) return;
-      quizAnswered = true;
-
-      // Desactivar botones
-      const allBtns = grid.querySelectorAll('.quiz-opt-btn');
-      allBtns.forEach(b => b.disabled = true);
-
-      if (opt.isCorrect) {
-        btn.classList.add('correct');
-        audio.playSuccess();
-        confetti.burst(window.innerWidth / 2, window.innerHeight / 2, 70);
-
-        // Sumar Gemas Estelares reales al balance del juego
-        game.agent.coins += 3;
-        game.agent.totalCoinsEarned += 3;
-        game.saveState();
-        updateTopNav();
-        renderRewards();
-
-        feedbackBox.className = 'quiz-feedback-box success';
-        feedbackBox.innerHTML = `🌟 <b>¡Brillante y Correcto!</b> ${q.tip}<br><small>¡Has ganado <b>+3 Gemas Estelares 💎</b> para tus premios!</small>`;
-        feedbackBox.style.display = 'block';
-      } else {
-        btn.classList.add('wrong');
-        audio.playSoftError();
-
-        // Resaltar la correcta amablemente
-        allBtns.forEach(b => {
-          if (b.textContent === q.options[q.correct]) {
-            b.classList.add('correct');
-          }
-        });
-
-        feedbackBox.className = 'quiz-feedback-box wrong';
-        feedbackBox.innerHTML = `💖 <b>¡Estuviste muy cerca!</b> La respuesta era: <b>${q.options[q.correct]}</b>.<br><small>¡Sigue intentando, cada vez eres más sabia!</small>`;
-        feedbackBox.style.display = 'block';
-      }
-
-      nextBtn.style.display = 'inline-flex';
-    });
-
-    grid.appendChild(btn);
-  });
-}
-
-window.nextQuizQuestion = function() {
-  audio.playTap();
-  quizIndex++;
-  if (quizIndex >= quizCurrentQuestions.length) {
-    // Fin de la ronda
-    audio.playFanfare();
-    confetti.burst(window.innerWidth / 2, window.innerHeight / 2, 100);
-
-    const questionBox = document.querySelector('.quiz-question-box');
-    document.getElementById('quizEmojiMain').textContent = '👑';
-    document.getElementById('quizQuestionText').innerHTML = `¡Increíble Trabajo, Idol Guerrera!<br><span style="font-size: 18px; color: var(--kpop-star-gold); font-weight: 600;">Completaste todas las adivinanzas y sumaste muchas Gemas Estelares 💎 a tu cuenta.</span>`;
-
-    document.getElementById('quizOptionsGrid').innerHTML = '';
-    document.getElementById('quizFeedbackBox').style.display = 'none';
-    document.getElementById('quizNextBtn').style.display = 'none';
-    document.getElementById('quizRestartBtn').textContent = '✨ ¡Jugar Otra Ronda!';
-  } else {
-    renderQuizQuestion();
-  }
-};
-
-window.restartQuiz = function() {
-  audio.playTap();
-  initQuiz();
-  document.getElementById('quizRestartBtn').textContent = '🔄 Reiniciar Rondas';
 };
 
 
@@ -1706,14 +1477,14 @@ function handleMemoryCardClick(card, icon) {
           audio.playFanfare();
           confetti.burst(window.innerWidth / 2, window.innerHeight / 2, 100);
 
-          // Premio especial: +10 Gemas Estelares
-          game.agent.coins += 10;
-          game.agent.totalCoinsEarned += 10;
+          // Premio especial: +15 Gemas Estelares
+          game.agent.coins += 15;
+          game.agent.totalCoinsEarned += 15;
           game.saveState();
           updateTopNav();
           renderRewards();
 
-          alert('🎉 ¡EXTRAORDINARIO! ¡Has encontrado todas las parejas y ganado +10 Gemas Estelares 💎!');
+          alert('🎉 ¡EXTRAORDINARIO! ¡Has encontrado todas las parejas y ganado +15 Gemas Estelares 💎!');
         }, 500);
       }
     } else {
