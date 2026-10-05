@@ -86,15 +86,379 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 28px;
-  background: rgba(20, 14, 46, 0.85);
+  padding: 12px 24px;
+  background: rgba(20, 14, 46, 0.92);
   backdrop-filter: blur(20px);
   border-bottom: 1.5px solid rgba(255, 45, 141, 0.25);
   position: sticky;
   top: 0;
   z-index: 100;
-  gap: 16px;
+  gap: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.nav-left-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.nav-right-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Botón de Menú Desplegable Principal */
+.nav-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, rgba(255, 45, 141, 0.25), rgba(139, 92, 246, 0.3));
+  border: 1.5px solid var(--kpop-pink);
+  border-radius: var(--radius-full);
+  color: #ffffff;
+  font-family: var(--font-child);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 16px var(--kpop-pink-glow);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-menu-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  background: linear-gradient(135deg, var(--kpop-pink), var(--kpop-magenta));
+  box-shadow: 0 4px 20px rgba(255, 45, 141, 0.6);
+}
+
+.nav-menu-btn .menu-icon {
+  font-size: 19px;
+  line-height: 1;
+}
+
+/* Botón de Música Pop (30s) */
+.nav-music-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 15px;
+  background: rgba(30, 20, 62, 0.9);
+  border: 1.5px solid rgba(0, 240, 255, 0.4);
+  border-radius: var(--radius-full);
+  color: #fff;
+  font-family: var(--font-spy);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.nav-music-btn:hover {
+  border-color: var(--kpop-cyan);
+  box-shadow: 0 0 14px var(--kpop-cyan-glow);
+  transform: translateY(-2px);
+}
+
+.nav-music-btn.playing {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(139, 92, 246, 0.25));
+  border-color: var(--kpop-cyan);
+  box-shadow: 0 0 18px var(--kpop-cyan-glow);
+}
+
+.music-wave-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 14px;
+}
+
+.music-wave-bars .bar {
+  width: 3px;
+  height: 4px;
+  background: var(--kpop-cyan);
+  border-radius: 2px;
+  transition: height 0.2s ease;
+}
+
+.nav-music-btn.playing .music-wave-bars .bar-1 {
+  animation: soundBar 0.6s infinite alternate ease-in-out;
+}
+.nav-music-btn.playing .music-wave-bars .bar-2 {
+  animation: soundBar 0.8s infinite alternate ease-in-out 0.2s;
+}
+.nav-music-btn.playing .music-wave-bars .bar-3 {
+  animation: soundBar 0.5s infinite alternate ease-in-out 0.4s;
+}
+
+@keyframes soundBar {
+  0% { height: 3px; }
+  100% { height: 14px; background: var(--kpop-pink); }
+}
+
+/* ========================================================
+   1.2 PANEL LATERAL HOLOGRÁFICO (DRAWER)
+   ======================================================== */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 4, 18, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 380px;
+  max-width: 86vw;
+  height: 100vh;
+  background: linear-gradient(180deg, #1b1138 0%, #120a28 100%);
+  border-right: 2px solid rgba(255, 45, 141, 0.35);
+  box-shadow: 12px 0 48px rgba(0, 0, 0, 0.7), 0 0 32px rgba(255, 45, 141, 0.25);
+  z-index: 1001;
+  transform: translateX(-105%);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nav-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: 24px 20px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.drawer-badge {
+  font-family: var(--font-spy);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--kpop-cyan);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.drawer-title {
+  font-family: var(--font-child);
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.drawer-close-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.drawer-close-btn:hover {
+  background: var(--kpop-pink);
+  transform: rotate(90deg);
+}
+
+.drawer-profile-card {
+  margin: 16px 20px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(255, 45, 141, 0.15), rgba(139, 92, 246, 0.15));
+  border: 1.5px solid rgba(255, 45, 141, 0.35);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.drawer-avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--kpop-pink), var(--kpop-cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 12px var(--kpop-pink-glow);
+}
+
+.drawer-profile-info {
+  flex: 1;
+}
+
+.drawer-profile-info h4 {
+  font-size: 16px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.drawer-rank {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.drawer-gems-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid var(--kpop-cyan);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-spy);
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+}
+
+.drawer-nav-list {
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.drawer-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 100%;
+}
+
+.drawer-nav-btn:hover {
+  background: rgba(255, 45, 141, 0.15);
+  border-color: var(--kpop-pink);
+  transform: translateX(4px);
+  box-shadow: 0 4px 18px rgba(255, 45, 141, 0.25);
+}
+
+.drawer-nav-btn.active {
+  background: linear-gradient(135deg, rgba(255, 45, 141, 0.35), rgba(139, 92, 246, 0.35));
+  border-color: var(--kpop-cyan);
+  box-shadow: 0 4px 20px var(--kpop-pink-glow);
+}
+
+.drawer-nav-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.drawer-nav-btn.active .drawer-nav-icon-box {
+  background: linear-gradient(135deg, var(--kpop-pink), var(--kpop-cyan));
+  box-shadow: 0 0 14px var(--kpop-pink-glow);
+}
+
+.drawer-nav-text {
+  flex: 1;
+}
+
+.drawer-nav-title {
+  display: block;
+  font-family: var(--font-child);
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.drawer-nav-sub {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  line-height: 1.3;
+}
+
+.drawer-nav-arrow {
+  color: var(--kpop-cyan);
+  font-size: 16px;
+  opacity: 0.6;
+  transition: transform 0.2s ease;
+}
+
+.drawer-nav-btn:hover .drawer-nav-arrow,
+.drawer-nav-btn.active .drawer-nav-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.drawer-footer {
+  padding: 16px 20px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+}
+
+.drawer-music-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.music-info span {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+}
+
+.music-info small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.drawer-music-btn {
+  padding: 8px 14px;
+  font-size: 13px;
 }
 
 .agent-summary {
@@ -2050,39 +2414,33 @@ body {
     font-size: 13px;
   }
 
-  /* Menú de Pestañas Táctiles: Siempre visible, adhesivo y desplazable sin cortar pestañas */
-  .tablet-tabs {
-    display: flex;
-    justify-content: flex-start !important;
+  .nav-left-group {
     gap: 8px;
-    padding: 10px 12px;
-    background: rgba(18, 12, 42, 0.95);
-    backdrop-filter: blur(20px);
-    border-bottom: 1.5px solid rgba(255, 45, 141, 0.25);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    position: sticky;
-    top: 56px;
-    z-index: 95;
-    width: 100%;
   }
 
-  .tablet-tabs::-webkit-scrollbar {
-    display: none;
+  .nav-right-group {
+    gap: 6px;
   }
 
-  .tab-btn {
-    flex: 0 0 auto;
-    flex-shrink: 0;
-    white-space: nowrap;
-    padding: 9px 16px;
+  .nav-menu-btn {
+    padding: 8px 12px;
     font-size: 14px;
     gap: 6px;
   }
 
-  .tab-btn .tab-icon {
-    font-size: 18px;
+  .nav-music-btn {
+    padding: 7px 11px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .music-wave-bars {
+    display: none;
+  }
+
+  /* Ocultar barra horizontal antigua en favor del moderno menú lateral */
+  .tablet-tabs {
+    display: none !important;
   }
 
   .main-container {
@@ -2169,6 +2527,15 @@ body {
     gap: 6px;
   }
 
+  .nav-menu-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .nav-menu-btn .menu-text {
+    display: none; /* En pantallas muy pequeñas sólo muestra el icono ☰ */
+  }
+
   .avatar-ring {
     width: 36px;
     height: 36px;
@@ -2184,19 +2551,19 @@ body {
 
   .agent-codename {
     font-size: 13px;
-    max-width: 90px;
+    max-width: 85px;
   }
 
   .coin-vault {
-    padding: 4px 10px;
+    padding: 4px 9px;
   }
 
   .coin-icon-glow {
-    font-size: 18px;
+    font-size: 17px;
   }
 
   .coin-number {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .hq-parent-btn {
@@ -2207,14 +2574,27 @@ body {
     display: none; /* En pantallas muy pequeñas sólo muestra el candado 🔒 y el badge */
   }
 
-  .tablet-tabs {
-    top: 50px;
-    padding: 8px 10px;
+  .nav-drawer {
+    width: 310px;
   }
 
-  .tab-btn {
-    padding: 8px 12px;
-    font-size: 13px;
+  .drawer-nav-btn {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .drawer-nav-icon-box {
+    width: 38px;
+    height: 38px;
+    font-size: 20px;
+  }
+
+  .drawer-nav-title {
+    font-size: 15px;
+  }
+
+  .drawer-nav-sub {
+    font-size: 11px;
   }
 
   .filter-pill {

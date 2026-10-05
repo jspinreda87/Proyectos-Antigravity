@@ -226,6 +226,290 @@ class SpyAudioEngine {
 
 const audio = new SpyAudioEngine();
 
+// --- 1.1 SINTETIZADOR DE CANCIÓN POP DE FONDO (30 SEGUNDOS) ---
+class PopMusicEngine {
+  constructor(audioEngine) {
+    this.audioEngine = audioEngine;
+    this.isPlaying = false;
+    this.activeNodes = [];
+    this.timer = null;
+    this.hasAutoTriggered = false;
+  }
+
+  play() {
+    this.audioEngine.init();
+    const ctx = this.audioEngine.ctx;
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    if (this.isPlaying) {
+      this.stop();
+    }
+
+    this.isPlaying = true;
+    this.updateUI(true);
+
+    const now = ctx.currentTime + 0.05;
+    const songDuration = 30.0; // 30 segundos de duración
+
+    // Ganancia maestra con Fade-in y Fade-out suave al final
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0.001, now);
+    masterGain.gain.exponentialRampToValueAtTime(0.26, now + 0.8);
+    // Iniciar desvanecimiento a los 26.5s hasta los 30.0s
+    masterGain.gain.setValueAtTime(0.26, now + 26.5);
+    masterGain.gain.exponentialRampToValueAtTime(0.001, now + songDuration);
+    masterGain.connect(ctx.destination);
+    this.activeNodes.push(masterGain);
+
+    // Tempo alegre K-Pop: 124 BPM (1 beat = ~0.484s)
+    const beatLen = 60 / 124;
+    const totalBeats = Math.floor(songDuration / beatLen);
+
+    // 1. BASE RÍTMICA (KICK, SNARE, HI-HAT)
+    for (let b = 0; b < totalBeats; b++) {
+      const beatTime = now + b * beatLen;
+      if (beatTime > now + songDuration - 1.0) break;
+
+      // Kick en cada tiempo
+      if (b >= 4) {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, beatTime);
+        osc.frequency.exponentialRampToValueAtTime(36, beatTime + 0.09);
+        g.gain.setValueAtTime(0.38, beatTime);
+        g.gain.exponentialRampToValueAtTime(0.001, beatTime + 0.09);
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start(beatTime);
+        osc.stop(beatTime + 0.1);
+        this.activeNodes.push(osc, g);
+      }
+
+      // Snare en tiempos 2 y 4 (b % 4 === 1 || b % 4 === 3)
+      if (b >= 8 && (b % 4 === 1 || b % 4 === 3)) {
+        const bufSize = Math.floor(ctx.sampleRate * 0.08);
+        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const out = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) out[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buf;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1800, beatTime);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.24, beatTime);
+        g.gain.exponentialRampToValueAtTime(0.001, beatTime + 0.08);
+        noise.connect(filter);
+        filter.connect(g);
+        g.connect(masterGain);
+        noise.start(beatTime);
+        this.activeNodes.push(noise, filter, g);
+      }
+
+      // Hi-Hat en contratiempos
+      if (b >= 4) {
+        const hatTime = beatTime + beatLen * 0.5;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(8000, hatTime);
+        g.gain.setValueAtTime(0.05, hatTime);
+        g.gain.exponentialRampToValueAtTime(0.001, hatTime + 0.03);
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start(hatTime);
+        osc.stop(hatTime + 0.03);
+        this.activeNodes.push(osc, g);
+      }
+    }
+
+    // 2. ACORDES Y BAJO POP ENÉRGICO (C - Am - F - G)
+    const chords = [
+      { root: 130.81, bass: 65.41, notes: [261.63, 329.63, 392.00] }, // C
+      { root: 110.00, bass: 55.00, notes: [220.00, 261.63, 329.63] }, // Am
+      { root: 87.31,  bass: 43.65, notes: [174.61, 220.00, 261.63] }, // F
+      { root: 98.00,  bass: 49.00, notes: [196.00, 246.94, 293.66] }  // G
+    ];
+
+    const barLen = beatLen * 4;
+    const totalBars = Math.floor(songDuration / barLen);
+
+    for (let bar = 0; bar < totalBars; bar++) {
+      const barTime = now + bar * barLen;
+      if (barTime > now + songDuration - 1.5) break;
+
+      const chord = chords[bar % chords.length];
+
+      // Bajo Pop
+      for (let s = 0; s < 4; s++) {
+        const bassTime = barTime + s * beatLen;
+        const bOsc = ctx.createOscillator();
+        const bGain = ctx.createGain();
+        bOsc.type = 'triangle';
+        bOsc.frequency.setValueAtTime(chord.bass, bassTime);
+        bGain.gain.setValueAtTime(0.28, bassTime);
+        bGain.gain.exponentialRampToValueAtTime(0.01, bassTime + beatLen * 0.7);
+        bOsc.connect(bGain);
+        bGain.connect(masterGain);
+        bOsc.start(bassTime);
+        bOsc.stop(bassTime + beatLen * 0.7);
+        this.activeNodes.push(bOsc, bGain);
+      }
+
+      // Campanitas mágicas / Arpegios de idol
+      chord.notes.forEach((freq, idx) => {
+        for (let rep = 0; rep < 2; rep++) {
+          const arpTime = barTime + rep * (barLen / 2) + idx * (beatLen * 0.5);
+          const aOsc = ctx.createOscillator();
+          const aGain = ctx.createGain();
+          aOsc.type = 'sine';
+          aOsc.frequency.setValueAtTime(freq * 2, arpTime);
+          aGain.gain.setValueAtTime(0.1, arpTime);
+          aGain.gain.exponentialRampToValueAtTime(0.001, arpTime + 0.3);
+          aOsc.connect(aGain);
+          aGain.connect(masterGain);
+          aOsc.start(arpTime);
+          aOsc.stop(arpTime + 0.3);
+          this.activeNodes.push(aOsc, aGain);
+        }
+      });
+    }
+
+    // 3. MELODÍA LEAD PRINCIPAL (Pop / Idol)
+    const melodyPattern = [
+      { note: 523.25, dur: 0.5 }, { note: 587.33, dur: 0.5 }, { note: 659.25, dur: 0.5 }, { note: 783.99, dur: 0.5 },
+      { note: 659.25, dur: 1.0 }, { note: 523.25, dur: 1.0 },
+      { note: 880.00, dur: 0.5 }, { note: 783.99, dur: 0.5 }, { note: 659.25, dur: 0.5 }, { note: 523.25, dur: 0.5 },
+      { note: 587.33, dur: 1.5 }, { note: 659.25, dur: 0.5 },
+      { note: 783.99, dur: 0.5 }, { note: 880.00, dur: 0.5 }, { note: 1046.5, dur: 1.0 },
+      { note: 880.00, dur: 0.5 }, { note: 783.99, dur: 0.5 }, { note: 659.25, dur: 1.0 },
+      { note: 587.33, dur: 0.5 }, { note: 659.25, dur: 0.5 }, { note: 523.25, dur: 2.0 }
+    ];
+
+    let melodyOffset = now + 4 * beatLen;
+    while (melodyOffset < now + 26.0) {
+      melodyPattern.forEach(m => {
+        if (melodyOffset >= now + 26.0) return;
+        const mOsc = ctx.createOscillator();
+        const mGain = ctx.createGain();
+        mOsc.type = 'sine';
+        mOsc.frequency.setValueAtTime(m.note, melodyOffset);
+        mGain.gain.setValueAtTime(0.16, melodyOffset);
+        mGain.gain.exponentialRampToValueAtTime(0.01, melodyOffset + m.dur * beatLen * 0.9);
+        mOsc.connect(mGain);
+        mGain.connect(masterGain);
+        mOsc.start(melodyOffset);
+        mOsc.stop(melodyOffset + m.dur * beatLen * 0.9);
+        this.activeNodes.push(mOsc, mGain);
+        melodyOffset += m.dur * beatLen;
+      });
+    }
+
+    // Auto-apagar a los 30 segundos exactos
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      this.stop();
+    }, songDuration * 1000);
+  }
+
+  stop() {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = null;
+    this.isPlaying = false;
+    this.updateUI(false);
+
+    try {
+      this.activeNodes.forEach(node => {
+        if (node.stop) node.stop();
+        if (node.disconnect) node.disconnect();
+      });
+    } catch (e) {}
+    this.activeNodes = [];
+  }
+
+  toggle() {
+    if (this.isPlaying) {
+      this.stop();
+    } else {
+      this.play();
+    }
+  }
+
+  updateUI(playing) {
+    const musicBtn = document.getElementById('musicToggleBtn');
+    const musicBtnIcon = document.getElementById('musicBtnIcon');
+    const drawerMusicBtn = document.getElementById('drawerMusicBtn');
+    const musicStatusText = document.getElementById('musicStatusText');
+
+    if (musicBtn) {
+      musicBtn.classList.toggle('playing', playing);
+      musicBtn.title = playing ? 'Pausar Canción Pop (30s)' : 'Tocar Canción Pop (30s)';
+    }
+    if (musicBtnIcon) {
+      musicBtnIcon.textContent = playing ? '🎵' : '🔇';
+    }
+    if (drawerMusicBtn) {
+      drawerMusicBtn.textContent = playing ? '⏸️ Pausar' : '▶️ Tocar Música';
+    }
+    if (musicStatusText) {
+      musicStatusText.textContent = playing ? '✨ Sonando tema pop (30s)...' : 'Canción Pop de 30 segundos';
+    }
+  }
+
+  setupAutoStartOnGesture() {
+    const startAudio = () => {
+      if (!this.hasAutoTriggered) {
+        this.hasAutoTriggered = true;
+        this.play();
+      }
+      window.removeEventListener('click', startAudio);
+      window.removeEventListener('touchstart', startAudio);
+      window.removeEventListener('pointerdown', startAudio);
+    };
+
+    window.addEventListener('click', startAudio, { once: true });
+    window.addEventListener('touchstart', startAudio, { once: true });
+    window.addEventListener('pointerdown', startAudio, { once: true });
+  }
+}
+
+const music = new PopMusicEngine(audio);
+
+// --- 1.2 CONTROL DEL MENÚ LATERAL (DRAWER HOLOGRÁFICO) ---
+function openNavDrawer() {
+  audio.playTap();
+  syncDrawerProfile();
+  const drawer = document.getElementById('navDrawer');
+  const backdrop = document.getElementById('navDrawerBackdrop');
+  if (drawer) drawer.classList.add('open');
+  if (backdrop) backdrop.classList.add('open');
+}
+
+function closeNavDrawer() {
+  const drawer = document.getElementById('navDrawer');
+  const backdrop = document.getElementById('navDrawerBackdrop');
+  if (drawer) drawer.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+}
+
+function syncDrawerProfile() {
+  const avatarEl = document.getElementById('drawerAvatar');
+  const codenameEl = document.getElementById('drawerCodename');
+  const rankEl = document.getElementById('drawerRankText');
+  const balanceEl = document.getElementById('drawerCoinBalance');
+  if (avatarEl) avatarEl.textContent = game.agent.avatar;
+  if (codenameEl) codenameEl.textContent = game.agent.codename;
+  if (rankEl) {
+    const rank = game.getCurrentRank();
+    rankEl.textContent = `${rank.title} ${rank.emoji}`;
+  }
+  if (balanceEl) balanceEl.textContent = game.agent.coins;
+}
+
 // --- 2. SISTEMA DE CONFETI Y ESTRELLAS POP ---
 class SpyConfetti {
   constructor() {
@@ -540,6 +824,7 @@ function updateTopNav() {
   if (hqCountSpan) {
     hqCountSpan.textContent = pendingReviewCount;
   }
+  syncDrawerProfile();
 }
 
 function renderMissions() {
@@ -1178,18 +1463,38 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTickets();
   renderAvatarPicker();
 
-  document.querySelectorAll('.tab-btn').forEach(btn => {
+  // Control de Apertura y Cierre del Menú Lateral (Drawer)
+  const menuToggleBtn = document.getElementById('menuToggleBtn');
+  const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+  const navDrawerBackdrop = document.getElementById('navDrawerBackdrop');
+
+  if (menuToggleBtn) menuToggleBtn.addEventListener('click', openNavDrawer);
+  if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeNavDrawer);
+  if (navDrawerBackdrop) navDrawerBackdrop.addEventListener('click', closeNavDrawer);
+
+  // Navegación táctil en el Drawer
+  document.querySelectorAll('.drawer-nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       audio.playTap();
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.drawer-nav-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
       btn.classList.add('active');
       const targetId = btn.getAttribute('data-tab');
       const targetContent = document.getElementById(targetId);
       if (targetContent) targetContent.classList.add('active');
+      closeNavDrawer();
     });
   });
+
+  // Botón de Canción Pop (30s) en Header y en Drawer
+  const musicToggleBtn = document.getElementById('musicToggleBtn');
+  const drawerMusicBtn = document.getElementById('drawerMusicBtn');
+  if (musicToggleBtn) musicToggleBtn.addEventListener('click', () => music.toggle());
+  if (drawerMusicBtn) drawerMusicBtn.addEventListener('click', () => music.toggle());
+
+  // Iniciar canción pop automáticamente con el primer toque en pantalla
+  music.setupAutoStartOnGesture();
 
   document.querySelectorAll('.filter-pill').forEach(pill => {
     pill.addEventListener('click', () => {
@@ -1203,7 +1508,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('agentBadgeBtn').addEventListener('click', () => {
     audio.playTap();
-    document.getElementById('tabBtnProfile').click();
+    document.querySelectorAll('.drawer-nav-btn').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-tab') === 'tab-profile');
+    });
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    const profileTab = document.getElementById('tab-profile');
+    if (profileTab) profileTab.classList.add('active');
   });
 
   document.getElementById('openParentHqBtn').addEventListener('click', openPinModal);

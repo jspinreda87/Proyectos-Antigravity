@@ -18,58 +18,140 @@
   <canvas id="confettiCanvas"></canvas>
 
   <!-- Barra Superior / Stage Central -->
+  <!-- Barra Superior / Stage Central -->
   <header class="top-nav">
-    <div class="agent-summary" id="agentBadgeBtn" title="Ver mi Credencial de Idol Guerrera">
-      <div class="avatar-ring">
-        <span class="avatar-emoji" id="navAvatarEmoji">🎤</span>
-        <span class="sparkle-orbit">✨</span>
-      </div>
-      <div class="agent-titles">
-        <span class="agent-rank-badge" id="navRankBadge">Rango: Debutante Pop</span>
-        <h2 class="agent-codename" id="navCodename">Vocalista Cósmica</h2>
+    <div class="nav-left-group">
+      <!-- Botón de Menú Desplegable Principal -->
+      <button class="nav-menu-btn" id="menuToggleBtn" title="Abrir Menú de Secciones">
+        <span class="menu-icon">☰</span>
+        <span class="menu-text">Menú</span>
+      </button>
+
+      <!-- Resumen del Agente -->
+      <div class="agent-summary" id="agentBadgeBtn" title="Ver mi Credencial de Idol Guerrera">
+        <div class="avatar-ring">
+          <span class="avatar-emoji" id="navAvatarEmoji">🎤</span>
+          <span class="sparkle-orbit">✨</span>
+        </div>
+        <div class="agent-titles">
+          <span class="agent-rank-badge" id="navRankBadge">Rango: Debutante Pop</span>
+          <h2 class="agent-codename" id="navCodename">Vocalista Cósmica</h2>
+        </div>
       </div>
     </div>
 
-    <!-- Bóveda de Gemas Estelares -->
-    <div class="coin-vault" id="coinVault">
-      <div class="coin-icon-glow">💎</div>
-      <div class="coin-counter">
-        <span class="coin-number" id="coinBalance">0</span>
-        <span class="coin-label">Gemas Estelares</span>
-      </div>
-    </div>
+    <!-- Controles Derecha -->
+    <div class="nav-right-group">
+      <!-- Botón Canción Pop de Fondo (30s) -->
+      <button class="nav-music-btn" id="musicToggleBtn" title="Canción Pop de Fondo (30s)">
+        <span id="musicBtnIcon">🎵</span>
+        <span class="music-wave-bars">
+          <span class="bar bar-1"></span>
+          <span class="bar bar-2"></span>
+          <span class="bar bar-3"></span>
+        </span>
+      </button>
 
-    <!-- Botón Cuartel General de Padres -->
-    <button class="hq-parent-btn" id="openParentHqBtn" title="Acceso exclusivo para Padres (Cuartel General)">
-      <span class="lock-icon">🔒</span>
-      <span class="hq-text">Zona Padres</span>
-      <span class="pending-badge" id="pendingHqBadge" style="display: none;">0</span>
-    </button>
+      <!-- Bóveda de Gemas Estelares -->
+      <div class="coin-vault" id="coinVault">
+        <div class="coin-icon-glow">💎</div>
+        <div class="coin-counter">
+          <span class="coin-number" id="coinBalance">0</span>
+          <span class="coin-label">Gemas</span>
+        </div>
+      </div>
+
+      <!-- Botón Cuartel General de Padres -->
+      <button class="hq-parent-btn" id="openParentHqBtn" title="Acceso exclusivo para Padres (Cuartel General)">
+        <span class="lock-icon">🔒</span>
+        <span class="hq-text">Zona Padres</span>
+        <span class="pending-badge" id="pendingHqBadge" style="display: none;">0</span>
+      </button>
+    </div>
   </header>
 
-  <!-- Pestañas Táctiles Estilo K-Pop Idol -->
-  <nav class="tablet-tabs">
-    <button class="tab-btn active" data-tab="tab-missions" id="tabBtnMissions">
-      <span class="tab-icon">✨</span>
-      <span class="tab-text">Misiones de Guerrera</span>
-    </button>
-    <button class="tab-btn" data-tab="tab-store" id="tabBtnStore">
-      <span class="tab-icon">🛍️</span>
-      <span class="tab-text">Tienda de Premios VIP</span>
-    </button>
-    <button class="tab-btn" data-tab="tab-profile" id="tabBtnProfile">
-      <span class="tab-icon">💖</span>
-      <span class="tab-text">Pase de Idol</span>
-    </button>
-    <button class="tab-btn" data-tab="tab-tickets" id="tabBtnTickets">
-      <span class="tab-icon">🎫</span>
-      <span class="tab-text">Mis Pases VIP</span>
-    </button>
-    <button class="tab-btn" data-tab="tab-arcade" id="tabBtnArcade">
-      <span class="tab-icon">🎮</span>
-      <span class="tab-text">Juegos Mágicos</span>
-    </button>
-  </nav>
+  <!-- ============================================== -->
+  <!-- MENÚ LATERAL DESPLEGABLE (DRAWER HOLOGRÁFICO) -->
+  <!-- ============================================== -->
+  <div class="drawer-backdrop" id="navDrawerBackdrop"></div>
+  <aside class="nav-drawer" id="navDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <span class="drawer-badge">✨ IDOL WARRIORS ACADEMY</span>
+        <h3 class="drawer-title">Menú del Escenario</h3>
+      </div>
+      <button class="drawer-close-btn" id="closeDrawerBtn" title="Cerrar Menú">✕</button>
+    </div>
+
+    <!-- Perfil Rápido en el Cajón -->
+    <div class="drawer-profile-card">
+      <div class="drawer-avatar-circle" id="drawerAvatar">🎤</div>
+      <div class="drawer-profile-info">
+        <h4 id="drawerCodename">Vocalista Cósmica</h4>
+        <span class="drawer-rank" id="drawerRankText">Debutante Pop 🌸</span>
+      </div>
+      <div class="drawer-gems-pill">
+        <span>💎</span> <b id="drawerCoinBalance">0</b>
+      </div>
+    </div>
+
+    <nav class="drawer-nav-list">
+      <button class="drawer-nav-btn active" data-tab="tab-missions">
+        <div class="drawer-nav-icon-box">✨</div>
+        <div class="drawer-nav-text">
+          <span class="drawer-nav-title">Misiones de Guerrera</span>
+          <span class="drawer-nav-sub">Retos del hogar, fotos y ganar gemas</span>
+        </div>
+        <span class="drawer-nav-arrow">➜</span>
+      </button>
+
+      <button class="drawer-nav-btn" data-tab="tab-store">
+        <div class="drawer-nav-icon-box">🛍️</div>
+        <div class="drawer-nav-text">
+          <span class="drawer-nav-title">Tienda de Premios VIP</span>
+          <span class="drawer-nav-sub">Canjea tus gemas por premios reales</span>
+        </div>
+        <span class="drawer-nav-arrow">➜</span>
+      </button>
+
+      <button class="drawer-nav-btn" data-tab="tab-profile">
+        <div class="drawer-nav-icon-box">💖</div>
+        <div class="drawer-nav-text">
+          <span class="drawer-nav-title">Pase de Idol</span>
+          <span class="drawer-nav-sub">Tu credencial oficial, avatar y rango</span>
+        </div>
+        <span class="drawer-nav-arrow">➜</span>
+      </button>
+
+      <button class="drawer-nav-btn" data-tab="tab-tickets">
+        <div class="drawer-nav-icon-box">🎫</div>
+        <div class="drawer-nav-text">
+          <span class="drawer-nav-title">Mis Pases VIP</span>
+          <span class="drawer-nav-sub">Pases canjeados para mostrar a papá y mamá</span>
+        </div>
+        <span class="drawer-nav-arrow">➜</span>
+      </button>
+
+      <button class="drawer-nav-btn" data-tab="tab-arcade">
+        <div class="drawer-nav-icon-box">🎮</div>
+        <div class="drawer-nav-text">
+          <span class="drawer-nav-title">Juegos Mágicos</span>
+          <span class="drawer-nav-sub">Memoria de Idols y Atrapa-Gemas Estelar</span>
+        </div>
+        <span class="drawer-nav-arrow">➜</span>
+      </button>
+    </nav>
+
+    <div class="drawer-footer">
+      <div class="drawer-music-card">
+        <div class="music-info">
+          <span>🎵 Canción Pop Inicial</span>
+          <small id="musicStatusText">Melodía Pop de 30 segundos</small>
+        </div>
+        <button class="btn btn-secondary drawer-music-btn" id="drawerMusicBtn">▶️ Tocar Música</button>
+      </div>
+    </div>
+  </aside>
 
   <!-- Contenedor Principal de Vistas -->
   <main class="main-container">
