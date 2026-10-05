@@ -84,16 +84,17 @@
     </div>
 
     <!-- Perfil Rápido en el Cajón -->
-    <div class="drawer-profile-card">
-      <div class="drawer-avatar-circle" id="drawerAvatar">🎤</div>
-      <div class="drawer-profile-info">
-        <h4 id="drawerCodename">Vocalista Cósmica</h4>
-        <span class="drawer-rank" id="drawerRankText">Debutante Pop 🌸</span>
+      <div class="drawer-profile-card">
+        <div class="drawer-avatar-circle" id="drawerAvatar">🎤</div>
+        <div class="drawer-profile-info">
+          <h4 id="drawerCodename">Vocalista Cósmica</h4>
+          <span class="drawer-rank" id="drawerRankText">Debutante Pop 🌸</span>
+        </div>
+        <button class="drawer-ai-quick-btn" id="drawerOpenAiStudioBtn" title="Estudio de Idol con IA">✨ IA</button>
+        <div class="drawer-gems-pill">
+          <span>💎</span> <b id="drawerCoinBalance">0</b>
+        </div>
       </div>
-      <div class="drawer-gems-pill">
-        <span>💎</span> <b id="drawerCoinBalance">0</b>
-      </div>
-    </div>
 
     <nav class="drawer-nav-list">
       <button class="drawer-nav-btn active" data-tab="tab-missions">
@@ -227,7 +228,7 @@
           <div class="id-card-body">
             <div class="id-photo-frame">
               <span class="id-avatar-large" id="cardAvatarEmoji">🎤</span>
-              <button class="change-avatar-btn" id="openAvatarPickerBtn">Cambiar Estilo 💖</button>
+              <button class="change-avatar-btn" id="openAvatarPickerBtn">✨ Estudio de Idol con IA 🎨</button>
             </div>
 
             <div class="id-details">
@@ -644,20 +645,158 @@
   </div>
 
   <!-- ============================================== -->
-  <!-- MODAL 5: VESTIDOR IDOL (AVATARES GUERRERAS K-POP) -->
+  <!-- MODAL 5: ESTUDIO DE IDOL CON IA ✨🎨 -->
   <!-- ============================================== -->
   <div class="modal-backdrop" id="avatarModal">
-    <div class="modal-card avatar-modal-card">
+    <div class="modal-card avatar-modal-card ai-studio-modal">
       <div class="modal-header">
         <div class="modal-title-group">
-          <span class="modal-badge">✨ VESTIDOR DE GUERRERAS K-POP</span>
-          <h3 class="modal-title">Elige tu Estilo de Guerrera</h3>
+          <span class="modal-badge">🤖 ESTUDIO DE ESTILO CON INTELIGENCIA ARTIFICIAL</span>
+          <h3 class="modal-title">Diseña tu Idol Guerrera ✨</h3>
         </div>
-        <button class="modal-close-btn" id="closeAvatarModalBtn">✕</button>
+        <button class="modal-close-btn" id="closeAvatarModalBtn" title="Cerrar Estudio">✕</button>
       </div>
 
-      <div class="avatar-choices-grid" id="avatarChoicesGrid">
-        <!-- Generado dinámicamente con JS -->
+      <!-- Pestañas internas del Estudio -->
+      <div class="ai-studio-tabs">
+        <button class="ai-tab-btn active" id="btnStudioTabAi" data-studiotab="ai-gen">
+          <span class="tab-emoji">✨</span>
+          <span>Generador con IA</span>
+        </button>
+        <button class="ai-tab-btn" id="btnStudioTabPre" data-studiotab="ai-gallery">
+          <span class="tab-emoji">⭐</span>
+          <span>Idols Exclusivas HD</span>
+        </button>
+        <button class="ai-tab-btn" id="btnStudioTabClassic" data-studiotab="classic">
+          <span class="tab-emoji">🎀</span>
+          <span>Emojis</span>
+        </button>
+      </div>
+
+      <div class="ai-studio-body">
+        <!-- SECCIÓN 1: GENERADOR MÁGICO CON IA -->
+        <div class="studio-section active" id="studioSecAiGen">
+          <div class="ai-gen-container">
+            <!-- Columna de personalización -->
+            <div class="ai-controls-col">
+              <div class="ai-control-group">
+                <label class="ai-label">
+                  <span>🎨 Color de Cabello</span>
+                  <small id="selectedHairLabel">Rosa Neón</small>
+                </label>
+                <div class="ai-chips-row" id="chipsHair">
+                  <button type="button" class="ai-chip active" data-val="pink" data-name="Rosa Neón">💖 Rosa</button>
+                  <button type="button" class="ai-chip" data-val="cyan" data-name="Celeste Cyan">🩵 Celeste</button>
+                  <button type="button" class="ai-chip" data-val="lavender purple" data-name="Lavanda Mágico">💜 Lavanda</button>
+                  <button type="button" class="ai-chip" data-val="golden blonde" data-name="Rubio Dorado">💛 Dorado</button>
+                  <button type="button" class="ai-chip" data-val="black with rainbow highlights" data-name="Negro Arcoíris">🖤 Arcoíris</button>
+                </div>
+              </div>
+
+              <div class="ai-control-group">
+                <label class="ai-label">
+                  <span>👑 Accesorio de Escenario</span>
+                  <small id="selectedAccLabel">Micrófono de Cristal</small>
+                </label>
+                <div class="ai-chips-row" id="chipsAcc">
+                  <button type="button" class="ai-chip active" data-val="crystal star microphone" data-name="Micrófono de Cristal">🎤 Micrófono</button>
+                  <button type="button" class="ai-chip" data-val="sparkling star tiara" data-name="Corona de Estrellas">👑 Corona</button>
+                  <button type="button" class="ai-chip" data-val="glowing cyber neon headphones" data-name="Audífonos Neón">🎧 Audífonos</button>
+                  <button type="button" class="ai-chip" data-val="holographic cat ears" data-name="Orejitas de Gato">🐱 Orejitas</button>
+                  <button type="button" class="ai-chip" data-val="magical glowing fairy wings" data-name="Alas de Hada">🧚‍♀️ Alas Hada</button>
+                </div>
+              </div>
+
+              <div class="ai-control-group">
+                <label class="ai-label">
+                  <span>👗 Traje de Idol</span>
+                  <small id="selectedOutfitLabel">Pop Star Brillante</small>
+                </label>
+                <div class="ai-chips-row" id="chipsOutfit">
+                  <button type="button" class="ai-chip active" data-val="sparkly K-pop star idol outfit" data-name="Pop Star Brillante">✨ Pop Star</button>
+                  <button type="button" class="ai-chip" data-val="futuristic cyberpunk battle idol uniform" data-name="Guerrera Cyber">⚡ Cyberpunk</button>
+                  <button type="button" class="ai-chip" data-val="cute pastel magical girl princess dress" data-name="Princesa Pastel">🌸 Princesa</button>
+                  <button type="button" class="ai-chip" data-val="glam galactic rockstar jacket" data-name="Rockera Galáctica">🎸 Rockera</button>
+                </div>
+              </div>
+
+              <div class="ai-control-group">
+                <label class="ai-label">
+                  <span>🐾 Mascota Acompañante</span>
+                  <small id="selectedPetLabel">Gatito Cósmico</small>
+                </label>
+                <div class="ai-chips-row" id="chipsPet">
+                  <button type="button" class="ai-chip active" data-val="adorable glowing cosmic kitten" data-name="Gatito Cósmico">🐱 Gatito</button>
+                  <button type="button" class="ai-chip" data-val="cute magical star fox" data-name="Zorro Estelar">🦊 Zorrito</button>
+                  <button type="button" class="ai-chip" data-val="chibi moon bunny pet" data-name="Conejito Lunar">🐰 Conejito</button>
+                  <button type="button" class="ai-chip" data-val="none" data-name="Solo Yo">⭐ Solo Yo</button>
+                </div>
+              </div>
+
+              <button class="btn-generate-ai" id="generateAiAvatarBtn">
+                <span class="gen-icon">✨</span>
+                <span>¡Crear mi Idol con IA!</span>
+                <span class="gen-sparkle">🚀</span>
+              </button>
+            </div>
+
+            <!-- Columna de vista previa -->
+            <div class="ai-preview-col">
+              <div class="ai-preview-card" id="aiPreviewCard">
+                <div class="ai-preview-frame" id="aiPreviewFrame">
+                  <!-- Imagen o estado inicial / cargando -->
+                  <div class="ai-placeholder-content" id="aiPlaceholderContent">
+                    <span class="ai-big-bot">🎨🤖</span>
+                    <h4>Tu Idol IA aparecerá aquí</h4>
+                    <p>Elige tu estilo favorito y presiona el botón mágico para que la Inteligencia Artificial pinte tu avatar único.</p>
+                  </div>
+                  
+                  <div class="ai-loading-overlay" id="aiLoadingOverlay" style="display: none;">
+                    <div class="ai-magic-orb"></div>
+                    <div class="ai-loading-status" id="aiLoadingStatus">Conectando con la IA...</div>
+                    <div class="ai-scan-bar"></div>
+                  </div>
+
+                  <img id="aiResultImg" class="ai-result-img" style="display: none;" alt="Idol Generada con IA">
+                </div>
+
+                <!-- Info de la Idol Generada -->
+                <div class="ai-result-info" id="aiResultInfo" style="display: none;">
+                  <div class="ai-suggested-name">
+                    <span class="ai-name-label">Nombre Artístico Sugerido:</span>
+                    <div class="ai-name-row">
+                      <strong id="aiSuggestedNameText">Aria Estrella</strong>
+                      <button class="btn-use-name" id="btnUseAiName" title="Usar este nombre en mi pase">Usar Nombre ✨</button>
+                    </div>
+                  </div>
+                  <span class="ai-power-tag" id="aiSuggestedPower">✨ Poder: Melodía de Cristal</span>
+
+                  <button class="btn-adopt-avatar" id="btnAdoptAiAvatar">
+                    💖 ¡Guardar esta Idol en mi Pase!
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: GALERÍA EXCLUSIVA HD (Pre-generadas) -->
+        <div class="studio-section" id="studioSecGallery" style="display: none;">
+          <div class="gallery-intro">
+            <h4>🌟 Colección de Idols Estelares</h4>
+            <p>Modelos de alta resolución listos para usar al instante:</p>
+          </div>
+          <div class="gallery-cards-grid" id="galleryCardsGrid">
+            <!-- Dinámico desde JS con idol_pink, idol_blue, idol_purple -->
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: EMOJIS CLÁSICOS -->
+        <div class="studio-section" id="studioSecClassic" style="display: none;">
+          <div class="avatar-choices-grid" id="avatarChoicesGrid">
+            <!-- Dinámico desde JS con los emojis -->
+          </div>
+        </div>
       </div>
     </div>
   </div>

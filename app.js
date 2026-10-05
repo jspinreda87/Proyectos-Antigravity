@@ -496,12 +496,23 @@ function closeNavDrawer() {
   if (backdrop) backdrop.classList.remove('open');
 }
 
+function renderAvatarBadge(containerId, avatarVal) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (avatarVal && (avatarVal.startsWith('avatars/') || avatarVal.startsWith('http') || avatarVal.startsWith('data:'))) {
+    el.innerHTML = `<img src="${avatarVal}" alt="Idol Avatar" class="avatar-img-fit">`;
+    el.classList.add('has-img-avatar');
+  } else {
+    el.textContent = avatarVal || '🎤';
+    el.classList.remove('has-img-avatar');
+  }
+}
+
 function syncDrawerProfile() {
-  const avatarEl = document.getElementById('drawerAvatar');
   const codenameEl = document.getElementById('drawerCodename');
   const rankEl = document.getElementById('drawerRankText');
   const balanceEl = document.getElementById('drawerCoinBalance');
-  if (avatarEl) avatarEl.textContent = game.agent.avatar;
+  renderAvatarBadge('drawerAvatar', game.agent.avatar);
   if (codenameEl) codenameEl.textContent = game.agent.codename;
   if (rankEl) {
     const rank = game.getCurrentRank();
@@ -805,7 +816,7 @@ const game = new GameManager();
 
 function updateTopNav() {
   const rank = game.getCurrentRank();
-  document.getElementById('navAvatarEmoji').textContent = game.agent.avatar;
+  renderAvatarBadge('navAvatarEmoji', game.agent.avatar);
   document.getElementById('navRankBadge').textContent = `Rango: ${rank.title}`;
   document.getElementById('navCodename').textContent = game.agent.codename;
   document.getElementById('coinBalance').textContent = game.agent.coins;
@@ -950,7 +961,7 @@ function renderRewards() {
 function renderProfile() {
   const rank = game.getCurrentRank();
   document.getElementById('cardAgentId').textContent = game.agent.idCode;
-  document.getElementById('cardAvatarEmoji').textContent = game.agent.avatar;
+  renderAvatarBadge('cardAvatarEmoji', game.agent.avatar);
   document.getElementById('cardCodename').textContent = game.agent.codename;
   document.getElementById('cardRankTag').textContent = `${rank.emoji} ${rank.title}`;
 
@@ -1413,7 +1424,305 @@ window.claimReward = function(rewardId) {
   document.getElementById('ticketModal').classList.add('show');
 };
 
-// --- 10. VESTIDOR DE GUERRERAS K-POP ---
+// --- 10. ESTUDIO DE ESTILO IDOL CON IA ✨🎨 ---
+
+const PRESET_AI_IDOLS = [
+  {
+    id: 'ai_pink',
+    name: 'Aria Estrella',
+    title: 'Vocalista Cósmica',
+    desc: 'Cabello rosa de ensueño, traje con destellos y micrófono de cristal.',
+    img: 'avatars/idol_pink.jpg',
+    power: 'Melodía de Cristal 💎'
+  },
+  {
+    id: 'ai_blue',
+    name: 'Nova Cyber',
+    title: 'Guerrera Electro-Pop',
+    desc: 'Look cyberpunk cyan, audífonos luminosos y baile imparable.',
+    img: 'avatars/idol_blue.jpg',
+    power: 'Ritmo Supersónico ⚡'
+  },
+  {
+    id: 'ai_purple',
+    name: 'Luna Mágica',
+    title: 'Princesa Galáctica',
+    desc: 'Pelo lavanda mágico, vestido estelar y su gatito cósmico neón.',
+    img: 'avatars/idol_purple.jpg',
+    power: 'Estrellas Purificadoras 🌟'
+  }
+];
+
+const AI_IDOL_NAMES = [
+  'Aria Estrella', 'Nova Sparkle', 'Luna Galáctica', 'Kira Neón',
+  'Mía Superstar', 'Estella Pop', 'Rin Centella', 'Zoe Estelar',
+  'Yuna Aurora', 'Bella Cósmica', 'Hana Diamante', 'Sakura Glow'
+];
+
+const AI_IDOL_POWERS = [
+  '✨ Poder: Melodía de Cristal',
+  '⚡ Poder: Ritmo Electro-Pop',
+  '🌸 Poder: Encanto Floral Mágico',
+  '🌟 Poder: Lluvia de Estrellas',
+  '💎 Poder: Resplandor de Diamante',
+  '🎵 Poder: Acorde Cósmico'
+];
+
+let currentAiGenConfig = {
+  hair: 'pink',
+  hairName: 'Rosa Neón',
+  accessory: 'crystal star microphone',
+  accessoryName: 'Micrófono de Cristal',
+  outfit: 'sparkly K-pop star idol outfit',
+  outfitName: 'Pop Star Brillante',
+  pet: 'adorable glowing cosmic kitten',
+  petName: 'Gatito Cósmico'
+};
+
+let currentGeneratedAiResult = null;
+let aiLoadingInterval = null;
+
+function openAiStudioModal(initialTab = 'ai-gen') {
+  audio.playTap();
+  closeNavDrawer();
+  const modal = document.getElementById('avatarModal');
+  if (!modal) return;
+  modal.classList.add('show');
+  switchStudioTab(initialTab);
+}
+
+function closeAiStudioModal() {
+  audio.playTap();
+  const modal = document.getElementById('avatarModal');
+  if (modal) modal.classList.remove('show');
+  if (aiLoadingInterval) clearInterval(aiLoadingInterval);
+}
+
+function switchStudioTab(tabId) {
+  audio.playTap();
+  document.querySelectorAll('.ai-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-studiotab') === tabId);
+  });
+
+  const secGen = document.getElementById('studioSecAiGen');
+  const secGal = document.getElementById('studioSecGallery');
+  const secClassic = document.getElementById('studioSecClassic');
+
+  if (secGen) secGen.style.display = tabId === 'ai-gen' ? 'block' : 'none';
+  if (secGal) secGal.style.display = tabId === 'ai-gallery' ? 'block' : 'none';
+  if (secClassic) secClassic.style.display = tabId === 'classic' ? 'block' : 'none';
+
+  if (tabId === 'ai-gallery') renderPresetAiGallery();
+  if (tabId === 'classic') renderAvatarPicker();
+}
+
+function initAiStudioChips() {
+  const groups = [
+    { rowId: 'chipsHair', labelId: 'selectedHairLabel', prop: 'hair', propName: 'hairName' },
+    { rowId: 'chipsAcc', labelId: 'selectedAccLabel', prop: 'accessory', propName: 'accessoryName' },
+    { rowId: 'chipsOutfit', labelId: 'selectedOutfitLabel', prop: 'outfit', propName: 'outfitName' },
+    { rowId: 'chipsPet', labelId: 'selectedPetLabel', prop: 'pet', propName: 'petName' }
+  ];
+
+  groups.forEach(g => {
+    const row = document.getElementById(g.rowId);
+    const label = document.getElementById(g.labelId);
+    if (!row) return;
+
+    row.querySelectorAll('.ai-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        audio.playTap();
+        row.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+
+        const val = chip.getAttribute('data-val');
+        const name = chip.getAttribute('data-name');
+        currentAiGenConfig[g.prop] = val;
+        currentAiGenConfig[g.propName] = name;
+        if (label) label.textContent = name;
+      });
+    });
+  });
+}
+
+function generateAiAvatar() {
+  const btn = document.getElementById('generateAiAvatarBtn');
+  const overlay = document.getElementById('aiLoadingOverlay');
+  const statusEl = document.getElementById('aiLoadingStatus');
+  const placeholder = document.getElementById('aiPlaceholderContent');
+  const resultImg = document.getElementById('aiResultImg');
+  const infoEl = document.getElementById('aiResultInfo');
+  const frame = document.getElementById('aiPreviewFrame');
+
+  if (!btn || !overlay || !statusEl) return;
+
+  audio.playCoin();
+  btn.disabled = true;
+  overlay.style.display = 'flex';
+  if (placeholder) placeholder.style.display = 'none';
+  if (resultImg) resultImg.style.display = 'none';
+  if (infoEl) infoEl.style.display = 'none';
+  if (frame) frame.classList.remove('has-image');
+
+  const loadingMessages = [
+    '🤖 Conectando con la IA de la Academia...',
+    `✨ Diseñando cabello ${currentAiGenConfig.hairName}...`,
+    `👑 Agregando ${currentAiGenConfig.accessoryName}...`,
+    `👗 Confeccionando traje ${currentAiGenConfig.outfitName}...`,
+    '🌟 Añadiendo destellos mágicos de escenario...',
+    '🎉 ¡Tu Idol única casi está lista!'
+  ];
+
+  let msgIdx = 0;
+  statusEl.textContent = loadingMessages[0];
+  if (aiLoadingInterval) clearInterval(aiLoadingInterval);
+  aiLoadingInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % loadingMessages.length;
+    statusEl.textContent = loadingMessages[msgIdx];
+  }, 1600);
+
+  const petPart = currentAiGenConfig.pet !== 'none' ? `with cute ${currentAiGenConfig.pet}, ` : '';
+  const promptText = `adorable cute anime K-pop idol warrior girl with ${currentAiGenConfig.hair} hair, wearing ${currentAiGenConfig.accessory}, ${currentAiGenConfig.outfit}, ${petPart}cheerful bright smile, sparkly stars background, 3D Pixar anime render, vibrant lighting`;
+
+  const seed = Math.floor(1000 + Math.random() * 900000);
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?seed=${seed}&nologo=true`;
+
+  const tempImg = new Image();
+  let finished = false;
+
+  const finishLoading = (success, finalUrl) => {
+    if (finished) return;
+    finished = true;
+    if (aiLoadingInterval) clearInterval(aiLoadingInterval);
+    overlay.style.display = 'none';
+    btn.disabled = false;
+
+    if (success && finalUrl) {
+      audio.playFanfare();
+      if (resultImg) {
+        resultImg.src = finalUrl;
+        resultImg.style.display = 'block';
+      }
+      if (frame) frame.classList.add('has-image');
+
+      const randomName = AI_IDOL_NAMES[Math.floor(Math.random() * AI_IDOL_NAMES.length)];
+      const randomPower = AI_IDOL_POWERS[Math.floor(Math.random() * AI_IDOL_POWERS.length)];
+
+      currentGeneratedAiResult = {
+        url: finalUrl,
+        name: randomName,
+        power: randomPower
+      };
+
+      const nameEl = document.getElementById('aiSuggestedNameText');
+      const powerEl = document.getElementById('aiSuggestedPower');
+      if (nameEl) nameEl.textContent = randomName;
+      if (powerEl) powerEl.textContent = randomPower;
+      if (infoEl) infoEl.style.display = 'flex';
+    } else {
+      // Fallback a un preset local si hay problema de red
+      const fallbackPreset = PRESET_AI_IDOLS[Math.floor(Math.random() * PRESET_AI_IDOLS.length)];
+      if (resultImg) {
+        resultImg.src = fallbackPreset.img;
+        resultImg.style.display = 'block';
+      }
+      if (frame) frame.classList.add('has-image');
+
+      currentGeneratedAiResult = {
+        url: fallbackPreset.img,
+        name: fallbackPreset.name,
+        power: fallbackPreset.power
+      };
+
+      const nameEl = document.getElementById('aiSuggestedNameText');
+      const powerEl = document.getElementById('aiSuggestedPower');
+      if (nameEl) nameEl.textContent = fallbackPreset.name;
+      if (powerEl) powerEl.textContent = fallbackPreset.power;
+      if (infoEl) infoEl.style.display = 'flex';
+
+      alert('¡Estilo Idol listo! (Activamos el modo seguro de alta definición para tu diversión ✨)');
+    }
+  };
+
+  const timeoutId = setTimeout(() => {
+    finishLoading(false);
+  }, 16000);
+
+  tempImg.onload = () => {
+    clearTimeout(timeoutId);
+    finishLoading(true, imageUrl);
+  };
+
+  tempImg.onerror = () => {
+    clearTimeout(timeoutId);
+    finishLoading(false);
+  };
+
+  tempImg.src = imageUrl;
+}
+
+function adoptGeneratedAiAvatar() {
+  if (!currentGeneratedAiResult || !currentGeneratedAiResult.url) return;
+  audio.playFanfare();
+  confetti.burst(window.innerWidth / 2, window.innerHeight / 2, 90);
+
+  game.agent.avatar = currentGeneratedAiResult.url;
+  game.saveState();
+  updateTopNav();
+  renderProfile();
+
+  document.getElementById('avatarModal').classList.remove('show');
+}
+
+function adoptGeneratedAiName() {
+  if (!currentGeneratedAiResult || !currentGeneratedAiResult.name) return;
+  audio.playCoin();
+  game.agent.codename = currentGeneratedAiResult.name;
+  game.saveState();
+  updateTopNav();
+  renderProfile();
+
+  const btn = document.getElementById('btnUseAiName');
+  if (btn) {
+    btn.textContent = '¡Aplicado! ✅';
+    setTimeout(() => { btn.textContent = 'Usar Nombre ✨'; }, 2000);
+  }
+}
+
+function renderPresetAiGallery() {
+  const container = document.getElementById('galleryCardsGrid');
+  if (!container) return;
+  container.innerHTML = '';
+
+  PRESET_AI_IDOLS.forEach(idol => {
+    const isCurrent = game.agent.avatar === idol.img;
+    const card = document.createElement('div');
+    card.className = `gallery-idol-card ${isCurrent ? 'active-selected' : ''}`;
+
+    card.innerHTML = `
+      <div class="gallery-idol-thumb">
+        <img src="${idol.img}" alt="${idol.name}">
+      </div>
+      <h4 class="gallery-idol-title">${idol.name}</h4>
+      <p class="gallery-idol-desc">${idol.desc}</p>
+      <button class="gallery-idol-btn" type="button">
+        ${isCurrent ? '¡Estilo Activo! 💖' : '💖 Elegir este Estilo'}
+      </button>
+    `;
+
+    card.querySelector('.gallery-idol-btn').addEventListener('click', () => {
+      audio.playFanfare();
+      confetti.burst(window.innerWidth / 2, window.innerHeight / 2, 80);
+      game.agent.avatar = idol.img;
+      game.saveState();
+      updateTopNav();
+      renderProfile();
+      document.getElementById('avatarModal').classList.remove('show');
+    });
+
+    container.appendChild(card);
+  });
+}
 
 function renderAvatarPicker() {
   const grid = document.getElementById('avatarChoicesGrid');
@@ -1670,14 +1979,36 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ticketModal').classList.remove('show');
   });
 
-  document.getElementById('openAvatarPickerBtn').addEventListener('click', () => {
-    audio.playTap();
-    renderAvatarPicker();
-    document.getElementById('avatarModal').classList.add('show');
-  });
-  document.getElementById('closeAvatarModalBtn').addEventListener('click', () => {
-    document.getElementById('avatarModal').classList.remove('show');
-  });
+  // Botón de Estudio de Idol con IA (en Pase de Idol y en Drawer)
+  const openAvatarPickerBtn = document.getElementById('openAvatarPickerBtn');
+  const drawerOpenAiStudioBtn = document.getElementById('drawerOpenAiStudioBtn');
+  const closeAvatarModalBtn = document.getElementById('closeAvatarModalBtn');
+
+  if (openAvatarPickerBtn) openAvatarPickerBtn.addEventListener('click', () => openAiStudioModal('ai-gen'));
+  if (drawerOpenAiStudioBtn) drawerOpenAiStudioBtn.addEventListener('click', () => openAiStudioModal('ai-gen'));
+  if (closeAvatarModalBtn) closeAvatarModalBtn.addEventListener('click', closeAiStudioModal);
+
+  // Pestañas del Estudio de IA
+  const btnStudioTabAi = document.getElementById('btnStudioTabAi');
+  const btnStudioTabPre = document.getElementById('btnStudioTabPre');
+  const btnStudioTabClassic = document.getElementById('btnStudioTabClassic');
+
+  if (btnStudioTabAi) btnStudioTabAi.addEventListener('click', () => switchStudioTab('ai-gen'));
+  if (btnStudioTabPre) btnStudioTabPre.addEventListener('click', () => switchStudioTab('ai-gallery'));
+  if (btnStudioTabClassic) btnStudioTabClassic.addEventListener('click', () => switchStudioTab('classic'));
+
+  // Generador IA botones
+  const generateAiAvatarBtn = document.getElementById('generateAiAvatarBtn');
+  const btnAdoptAiAvatar = document.getElementById('btnAdoptAiAvatar');
+  const btnUseAiName = document.getElementById('btnUseAiName');
+
+  if (generateAiAvatarBtn) generateAiAvatarBtn.addEventListener('click', generateAiAvatar);
+  if (btnAdoptAiAvatar) btnAdoptAiAvatar.addEventListener('click', adoptGeneratedAiAvatar);
+  if (btnUseAiName) btnUseAiName.addEventListener('click', adoptGeneratedAiName);
+
+  initAiStudioChips();
+  renderPresetAiGallery();
+
   document.getElementById('editNameBtn').addEventListener('click', promptEditName);
 
   // Inicializar Minijuegos
